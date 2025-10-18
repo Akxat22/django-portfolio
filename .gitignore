@@ -1,0 +1,27 @@
+# Python / Django
+*.pyc
+__pycache__/
+venv/
+env/
+*.egg-info/
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Secrets (VERY IMPORTANT)
+*.env
+.env
+config.ini
+secrets.yml
+*.key
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Static & Media (User Uploads)
+# These are generated or uploaded, not part of the source code.
+static/
+media/
