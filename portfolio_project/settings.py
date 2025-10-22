@@ -33,7 +33,7 @@ SECRET_KEY = os.environ.get(
 # DEBUG is False in production (on Render) and True locally.
 # This checks if the 'RENDER' environment variable is set.
 # DEBUG = 'RENDER' not in os.environ
-DEBUG = True
+DEBUG = False
 
 # --- FIX 3: ALLOWED HOSTS ---
 # This automatically gets your Render URL.
