@@ -29,3 +29,21 @@ def home(request):
     }
     
     return render(request, 'portfolio/home.html', context)
+
+def custom_404(request, exception):
+    """
+    Custom view for 404 Page Not Found errors.
+    """
+    # We still need to fetch 'about' and 'socials'
+    # so the sidebar and header render correctly.
+    about = About.objects.first()
+    social_links = SocialLink.objects.all()
+    socials = {link.platform: link.link for link in social_links}
+
+    context = {
+        'about': about,
+        'socials': socials,
+    }
+    
+    # Render the 404.html template with a 404 status code
+    return render(request, 'portfolio/404.html', context, status=404)

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - Page Not Found</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Font 'Montserrat' -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- Custom Styles -->
+    <style>
+        body {
+            /* Set the font-family to Montserrat, with sans-serif as a fallback */
+            font-family: "Montserrat", sans-serif;
+            /* Dark background color, characteristic of Spotify */
+            background-color: #000;
+            /* Default text color */
+            color: #b3b3b3;
+        }
+        /* Custom class for Spotify's green accent color */
+        .bg-accent-color {
+            background-color: #1db954;
+        }
+        /* Hover state for the accent color */
+        .hover-bg-accent-color:hover {
+            background-color: #1ed760;
+        }
+    </style>
+</head>
+<body class="antialiased text-sm">
+    <!-- Main container, centered vertically and horizontally -->
+    <div class="min-h-screen flex flex-col items-center justify-center text-center p-4">
+        
+        <!-- 404 Heading -->
+        <h1 class="text-8xl font-extrabold text-white">404</h1>
+        
+        <!-- Subtitle -->
+        <p class="mt-4 text-2xl font-bold text-white">Page Not Found</p>
+        
+        <!-- Description -->
+        <p class="mt-2 text-lg text-gray-300 max-w-md">
+            The page you're looking for doesn't exist or has been moved.
+        </p>
+        
+        <!-- Home Button -->
+        <a href="/" class="mt-8 px-6 py-3 bg-accent-color text-black text-sm font-bold rounded-full shadow-md hover-bg-accent-color transition-all duration-300 transform hover:scale-105">
+            Go Home
+        </a>
+    </div>
+</body>
+</html>
