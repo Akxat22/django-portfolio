@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>{{ about.name }} - Resume</title>
+    <style>
+        /* --- Base Styles (for screen) --- */
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 40px;
+            border: 1px solid #ddd;
+        }
+
+        #download-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 30px;
+            background-color: #1db954;
+            color: #000;
+            font-weight: bold;
+            font-size: 14pt;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+        #download-button:hover {
+            background-color: #1ed760;
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 26pt;
+            margin: 0 0 5px 0;
+            color: #000;
+        }
+        .header h4 {
+            font-size: 16pt;
+            font-weight: 500;
+            color: #333;
+            margin: 0;
+        }
+        .contact-info {
+            font-size: 10pt;
+            color: #333;
+            margin-top: 10px;
+        }
+        .contact-info a {
+            color: #333;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Section Styling --- */
+        .section {
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 14pt;
+            color: #000;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        /* --- Item Styling --- */
+        .item {
+            margin-bottom: 15px;
+        }
+        h3 {
+            font-size: 13pt;
+            color: #000;
+            margin: 0;
+        }
+        .item-subhead {
+            font-size: 11pt;
+            color: #333;
+            font-weight: bold;
+            margin: 2px 0;
+        }
+        .item-date {
+            font-style: italic;
+            color: #555;
+            font-size: 10pt;
+            margin-bottom: 5px;
+        }
+        .description {
+            font-size: 11pt;
+        }
+        
+        .skills-list {
+            list-style: disc;
+            padding-left: 20px;
+            margin: 0;
+            overflow: hidden;
+        }
+        .skills-list li {
+            width: 45%;
+            float: left;
+            margin-bottom: 5px;
+        }
+
+        /* -------------------------------------------
+        --- 1-PAGE-PDF COMPRESSION STYLES ---
+        -------------------------------------------
+        */
+        @media print {
+            #download-button {
+                display: none; /* Hide the button */
+            }
+            body {
+                border: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+                /* --- Compression --- */
+                font-size: 10pt;  /* Reduced from 11pt */
+                line-height: 1.3; /* Reduced from 1.4 */
+            }
+            
+            /* --- Squeeze Header --- */
+            .header {
+                padding-bottom: 10px; /* Reduced from 15px */
+                margin-bottom: 15px; /* Reduced from 20px */
+            }
+            h1 {
+                font-size: 22pt; /* Reduced from 26pt */
+            }
+            .header h4 {
+                font-size: 14pt; /* Reduced from 16pt */
+            }
+            .contact-info {
+                margin-top: 8px;
+            }
+
+            /* --- Squeeze Sections --- */
+            .section {
+                margin-bottom: 12px; /* Reduced from 20px */
+            }
+            h2 {
+                font-size: 13pt; /* Reduced from 14pt */
+                margin-bottom: 10px; /* Reduced from 15px */
+                padding-bottom: 3px;  /* Reduced from 5px */
+            }
+            
+            /* --- Squeeze Items --- */
+            .item {
+                margin-bottom: 10px; /* Reduced from 15px */
+            }
+            h3 {
+                font-size: 12pt; /* Reduced from 13pt */
+            }
+            .item-subhead {
+                font-size: 10pt;
+            }
+            .item-date {
+                margin-bottom: 3px; /* Reduced from 5px */
+            }
+            .skills-list li {
+                margin-bottom: 3px;
+            }
+            .description {
+                font-size: 10pt;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="download-button" onclick="window.print();">
+        Download as PDF (or Print)
+    </button>
+
+    <div class="header">
+        <h1>{{ about.name }}</h1>
+        <h4>{{ about.title }}</h4>
+        <div class="contact-info">
+            {% if socials.email %}<a href="{{ socials.email }}">{{ socials.email_link }}</a>{% endif %}
+            {% if socials.linkedin %}<span>&bull;</span> <a href="{{ socials.linkedin }}" target="_blank">LinkedIn</a>{% endif %}
+            {% if socials.github %}<span>&bull;</span> <a href="{{ socials.github }}" target="_blank">GitHub</a>{% endif %}
+        </div>
+    </div>
+
+    <div class="section" id="summary">
+        <h2>Professional Summary</h2>
+        <p class="description">{{ about.description|linebreaksbr }}</p>
+    </div>
+
+    <div class="section" id="skills">
+        <h2>Skills</h2>
+        <ul class="skills-list">
+            {% for skill in skills %}
+                <li>{{ skill.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="section" id="experience">
+        <h2>Experience</h2>
+        {% for job in jobs %}
+            <div class="item">
+                <h3>{{ job.role }}</h3>
+                <div class="item-subhead">{{ job.company }} | {{ job.location }}</div>
+                <div class="item-date">{{ job.start_date }} - {{ job.end_date|default:"Present" }}</div>
+                <div class="description">{{ job.description|linebreaksbr }}</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div classs="section" id="education">
+        <h2>Education</h2>
+        {% for edu in educations %}
+            <div class="item">
+                <h3>{{ edu.degree }}</h3>
+                <div class="item-subhead">{{ edu.institution }}</div>
+                <div class="item-date">{{ edu.start_year }} - {{ edu.end_year }}</div>
+                {% if edu.description %}
+                <div class="description">{{ edu.description|linebreaksbr }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

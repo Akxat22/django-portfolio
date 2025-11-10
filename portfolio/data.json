@@ -1,0 +1,142 @@
+{
+    "skills": [
+        {
+            "name": "HTML5"
+        },
+        {
+            "name": "Python"
+        },
+        {
+            "name": "CSS"
+        },
+        {
+            "name": "C Programming"
+        },
+        {
+            "name": "Data Structures and Algorithms"
+        },
+        {
+            "name": "Django"
+        },
+        {
+            "name": "Flask"
+        },
+        {
+            "name": "Tkinter"
+        },
+        {
+            "name": "Django REST Framework"
+        },
+        {
+            "name": "MongoDB"
+        },
+        {
+            "name": "Project Management"
+        },
+        {
+            "name": "RegEx"
+        },
+        {
+            "name": "Markdown"
+        },
+        {
+            "name": "JavaScript"
+        }
+    ],
+    "about": {
+        "name": "Akshat Singh",
+        "title": "Software Developer",
+        "description": "I'm a Computer Science graduate and a Software Developer at prutor@iitk. My approach to development is rooted in the strong problem-solving skills I honed during my B.Tech in CSE and while preparing for the GATE 2024 exam. This background gives me the ability to not just write code, but to understand the \"why\" behind it, ensuring my solutions are both robust and efficient.",
+        "skills": [
+            "HTML5",
+            "Python",
+            "CSS",
+            "C Programming",
+            "Data Structures and Algorithms",
+            "Django",
+            "Flask",
+            "Tkinter",
+            "Django REST Framework",
+            "MongoDB",
+            "Project Management",
+            "RegEx",
+            "Markdown",
+            "JavaScript"
+        ]
+    },
+    "experience": [
+        {
+            "company": "Prutor@IITK",
+            "role": "Software Developer Intern",
+            "location": "Nodia, UP",
+            "start_date": "01 July 2024",
+            "end_date": "31 June 2025",
+            "description": "As a software developer, I contributed to key projects, including the development of a collaborative ERP system and some project management task"
+        },
+        {
+            "company": "Prutor@IITK",
+            "role": "Software Developer",
+            "location": "Nodia, UP",
+            "start_date": "01 July 2025",
+            "end_date": "",
+            "description": "As a software developer, I'm working on various techniques and developing tools for the internal management and functioning of the operations of the company"
+        }
+    ],
+    "education": [
+        {
+            "institution": "Krishna Engineering College, Ghaziabad",
+            "degree": "Bachelor of Technology - BTech, Computer Science and Engineering",
+            "start_year": 2021,
+            "end_year": 2025,
+            "description": "Graduated with a Bachelor of Technology in Computer Science, achieving a final CGPA of 7.47."
+        },
+        {
+            "institution": "Delhi Public School, Meerut",
+            "degree": "12th",
+            "start_year": 2020,
+            "end_year": 2021,
+            "description": "Passed 12th with 88 percentage"
+        },
+        {
+            "institution": "Delhi Public School, Meerut",
+            "degree": "10th",
+            "start_year": 2018,
+            "end_year": 2019,
+            "description": "Passed with 89.8 percentage"
+        }
+    ],
+    "projects": [
+        {
+            "title": "CollegeCallKaro",
+            "short_description": "Freelance Django Project.",
+            "long_description": "A freelance project for an educational consultancy website built with a robust backend using Django, and a dynamic frontend with HTML, CSS, and JavaScript.",
+            "link": "https://collegecallkaro.com"
+        },
+        {
+            "title": "ERP System @ Prutor",
+            "short_description": "Team-based ERP development.",
+            "long_description": "As part of a team at Prutor@IITK, I contributed to the development of an Enterprise Resource Planning (ERP) system for the educational platform.",
+            "link": null
+        },
+        {
+            "title": "SVG Image Editor",
+            "short_description": "Desktop SVG editor with Tkinter.",
+            "long_description": "I independently developed a desktop-based SVG image editor using Python's Tkinter library as a tool for the Prutor platform, allowing for basic SVG manipulations.",
+            "link": null
+        }
+    ],
+    "social_links": [
+        {
+            "platform": "email",
+            "link": "ind.akshatsingh@gmail.com"
+        },
+        {
+            "platform": "github",
+            "link": "https://github.com/Akxat22"
+        },
+        {
+            "platform": "linkedin",
+            "link": "https://www.linkedin.com/in/akshat-singh-a6a626240"
+        }
+    ]
+}
