@@ -6,6 +6,19 @@ from django.utils.html import strip_tags
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from .models import *
+import threading # <--- Import this
+
+# --- CLASS TO HANDLE BACKGROUND EMAILS ---
+class EmailThread(threading.Thread):
+    def __init__(self, email_message):
+        self.email_message = email_message
+        threading.Thread.__init__(self)
+
+    def run(self):
+        try:
+            self.email_message.send()
+        except Exception as e:
+            print(f"Error sending email in background: {e}")
 
 def home(request):
     """
@@ -20,7 +33,7 @@ def home(request):
 
         if name and email and message:
             try:
-                # Prepare context for email templates
+                # Prepare context
                 current_site = get_current_site(request)
                 email_context = {
                     'name': name,
@@ -30,9 +43,9 @@ def home(request):
                     'domain': current_site.domain
                 }
 
-                # 1. Send Admin Email (To You)
+                # 1. Prepare Admin Email (Do NOT send yet)
                 html_admin = render_to_string('emails/contact_admin.html', email_context)
-                text_admin = strip_tags(html_admin) # Plain text fallback
+                text_admin = strip_tags(html_admin)
                 
                 msg_admin = EmailMultiAlternatives(
                     subject=f"Portfolio Contact: {subject} from {name}",
@@ -41,9 +54,8 @@ def home(request):
                     to=[settings.EMAIL_HOST_USER]
                 )
                 msg_admin.attach_alternative(html_admin, "text/html")
-                msg_admin.send()
 
-                # 2. Send User Confirmation Email (To Visitor)
+                # 2. Prepare User Email (Do NOT send yet)
                 html_user = render_to_string('emails/contact_user.html', email_context)
                 text_user = strip_tags(html_user)
                 
@@ -54,19 +66,22 @@ def home(request):
                     to=[email]
                 )
                 msg_user.attach_alternative(html_user, "text/html")
-                msg_user.send()
+
+                # 3. Send Both in Background Threads
+                # This prevents the server from waiting/timing out
+                EmailThread(msg_admin).start()
+                EmailThread(msg_user).start()
 
                 messages.success(request, "Message sent successfully! I'll be in touch soon.")
                 return redirect('home')
             
             except Exception as e:
-                # Log error in console for debugging
                 print(f"Email Error: {e}") 
-                messages.error(request, "Error sending email. Please try again later.")
+                messages.error(request, "Error processing your request.")
         else:
             messages.error(request, "Please fill in all required fields.")
 
-    # --- FETCH DATA FOR PORTFOLIO ---
+    # --- FETCH DATA ---
     about = About.objects.first()
     jobs = Experience.objects.order_by('-start_date')
     educations = Education.objects.order_by('-end_year')
@@ -74,11 +89,9 @@ def home(request):
     social_links = SocialLink.objects.all()
     recent_posts = BlogPost.objects.order_by('-published_at')[:5]
     
-    # Process social links
     socials = {}
     for link in social_links:
         socials[link.platform] = link.link
-        # Create a raw email link (without 'mailto:') for display text if needed
         if link.platform == 'email':
             socials['email_link'] = link.link.replace('mailto:', '')
 
@@ -91,7 +104,6 @@ def home(request):
         'recent_posts': recent_posts,
     }
     return render(request, 'portfolio/home.html', context)
-
 
 def resume_html_view(request):
     """
