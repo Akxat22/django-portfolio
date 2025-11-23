@@ -150,7 +150,6 @@ EMAIL_USE_SSL = True
 # Credentials
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Set this to receive admin notifications
 ADMIN_EMAIL = EMAIL_HOST_USER
