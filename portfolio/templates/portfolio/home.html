@@ -308,10 +308,14 @@
                              
                             <div class="relative mb-4 shadow-lg rounded-md overflow-hidden">
                                 {% if project.image %}
-                                <img src="{{ project.image.url }}" class="w-full aspect-square object-cover" alt="{{ project.title }}">
+                                    <img src="{{ project.image.url }}" class="w-full aspect-square object-cover" alt="{{ project.title }}">
                                 {% else %}
-                                <div class="w-full aspect-square bg-[#333] flex items-center justify-center text-gray-500 font-bold text-xl">{{ project.title|first }}</div>
+                                    <div class="w-full aspect-square bg-[#333] flex items-center justify-center text-gray-500 font-bold text-3xl project-initials-placeholder select-none" 
+                                        data-title="{{ project.title }}">
+                                        {{ project.title|slice:":2"|upper }}
+                                    </div>
                                 {% endif %}
+                                
                                 <div class="play-button absolute bottom-2 right-2 w-12 h-12 bg-[#1db954] rounded-full flex items-center justify-center text-black">
                                     <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
                                 </div>
@@ -608,6 +612,48 @@
         modal.addEventListener('click', (e) => {
             if(e.target === modal) modal.classList.add('hidden');
         });
+    // --- ROBUST INITIALS GENERATOR ---
+        const generateInitials = (title) => {
+            if (!title) return '';
+            
+            title = title.trim();
+
+            // 1. If the title has spaces (e.g., "College Call Karo")
+            // Split by space and take the first letter of each word
+            if (title.includes(' ')) {
+                return title
+                    .split(' ')
+                    .map(word => word.charAt(0))
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 4); // Limit to 4 chars max
+            }
+
+            // 2. If the title has NO spaces (e.g., "CollegeCallKaro")
+            // Extract all uppercase letters
+            const capitalMatches = title.match(/[A-Z]/g);
+            if (capitalMatches && capitalMatches.length > 0) {
+                return capitalMatches.join('').slice(0, 4);
+            }
+
+            // 3. Fallback: If no spaces and no capitals (e.g., "collegecallkaro")
+            // Just take the first 2 letters
+            return title.substring(0, 2).toUpperCase();
+        };
+
+        const initPlaceholders = () => {
+            const placeholders = document.querySelectorAll('.project-initials-placeholder');
+            placeholders.forEach(el => {
+                const title = el.getAttribute('data-title');
+                el.innerText = generateInitials(title);
+            });
+        };
+
+        // Run immediately 
+        initPlaceholders();
+        
+        // Also run on DOMContentLoaded to be safe
+        document.addEventListener('DOMContentLoaded', initPlaceholders);
 
     </script>
 </body>
