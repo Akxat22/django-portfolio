@@ -118,15 +118,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # --- EMAIL CONFIGURATION ---
-# We use standard TLS (587). The "IPv4 Patch" in your wsgi.py file
-# will ensure this connects successfully on Render.
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
-EMAIL_USE_TLS = False       # Turn TLS OFF
-EMAIL_USE_SSL = True        # Turn SSL ON
+# Point to your new custom class
+EMAIL_BACKEND = 'portfolio.email_backend.RenderGmailBackend'
 
-# Credentials from Environment Variables
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465    # SSL Port
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+
+# Credentials
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
