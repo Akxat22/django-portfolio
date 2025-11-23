@@ -1,39 +1,29 @@
 """
 Django settings for portfolio_project project.
 """
+
 from pathlib import Path
 import os
 import dj_database_url
 from decouple import config, Csv
-import socket
-
-original_getaddrinfo = socket.getaddrinfo
-
-def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-    # Force the address family to IPv4 (AF_INET)
-    if family == 0:
-        family = socket.AF_INET 
-    return original_getaddrinfo(host, port, family, type, proto, flags)
-
-socket.getaddrinfo = ipv4_getaddrinfo
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # --- SECURITY CONFIGURATION ---
 
 # 1. SECRET_KEY
-# Tries to read from .env or Render Environment. 
-# If missing, uses a fallback (unsafe) key for build processes to succeed.
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-fallback-key-change-this-in-production')
+# Reads from .env locally or Render Environment. 
+# Includes a fallback for build processes (unsafe for production, safe for build).
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-build-key-fallback')
 
 # 2. DEBUG MODE
-# DEBUG will be False if the 'RENDER' environment variable exists (Production),
-# otherwise it defaults to True (Local Development).
+# DEBUG is False if running on Render, True if running locally.
 DEBUG = 'RENDER' not in os.environ
 
 # 3. ALLOWED HOSTS
-# automatically adds localhost and your Render URL
+# Allow localhost and the Render URL automatically.
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -41,13 +31,14 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 
 # Application definition
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',  # Must be before staticfiles
+    'whitenoise.runserver_nostatic',  # <--- Essential for local static files
     'django.contrib.staticfiles',
     'portfolio',
     'ckeditor',
@@ -55,7 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Critical for static files on Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <--- Essential for Render static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,7 +60,7 @@ ROOT_URLCONF = 'portfolio_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], # Added template dir just in case
+        'DIRS': [BASE_DIR / 'templates'], # Ensures it finds your email templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,7 +103,9 @@ USE_TZ = True
 
 # --- STATIC FILES (WhiteNoise) ---
 STATIC_URL = 'static/'
+# This is where 'collectstatic' will copy all files to serve them
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Compression and Caching
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # --- MEDIA FILES ---
@@ -125,15 +118,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # --- EMAIL CONFIGURATION ---
-# --- EMAIL CONFIGURATION ---
+# We use standard TLS (587). The "IPv4 Patch" in your wsgi.py file
+# will ensure this connects successfully on Render.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-
-# Use Port 587 + TLS (Standard for Gmail)
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False  # Turn SSL off
+EMAIL_USE_SSL = False
 
+# Credentials from Environment Variables
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Set this to receive admin notifications
+ADMIN_EMAIL = EMAIL_HOST_USER
