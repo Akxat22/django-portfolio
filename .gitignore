@@ -24,3 +24,4 @@ secrets.yml
 # Static & Media (User Uploads)
 # These are generated or uploaded, not part of the source code.
 static/
+media/
