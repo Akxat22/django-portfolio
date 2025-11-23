@@ -122,10 +122,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Point to your new custom class
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 
+# 1. READ KEY DIRECTLY FROM OS (Bypassing python-decouple for safety)
+brevo_key = os.environ.get('BREVO_API_KEY')
+
+# 2. DEBUGGING: Print status to Render Logs
+if brevo_key:
+    # Print only first 5 chars for security
+    print(f"✅ DEBUG: Brevo Key loaded successfully! Starts with: {brevo_key[:5]}...")
+else:
+    print("❌ DEBUG: Brevo Key is MISSING in Environment Variables!")
+
 ANYMAIL = {
-    "BREVO_API_KEY": config('BREVO_API_KEY', default=""),
-    # Increase timeout to 30 seconds (default is often too short for free tier)
-    "REQUESTS_TIMEOUT": 30,  
+    "BREVO_API_KEY": brevo_key,
+    "REQUESTS_TIMEOUT": 30,
 }
 
 # The email address you used to sign up for Brevo
