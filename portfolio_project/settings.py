@@ -123,7 +123,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 
 ANYMAIL = {
-    "BREVO_API_KEY": config('BREVO_API_KEY'),
+    "BREVO_API_KEY": config('BREVO_API_KEY', default=""),
+    # Increase timeout to 30 seconds (default is often too short for free tier)
+    "REQUESTS_TIMEOUT": 30,  
 }
 
 # The email address you used to sign up for Brevo
