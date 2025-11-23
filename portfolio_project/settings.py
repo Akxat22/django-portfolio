@@ -122,9 +122,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # will ensure this connects successfully on Render.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False       # Turn TLS OFF
+EMAIL_USE_SSL = True        # Turn SSL ON
 
 # Credentials from Environment Variables
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
