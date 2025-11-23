@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from .models import *
@@ -19,10 +18,11 @@ class EmailThread(threading.Thread):
         try:
             self.email_message.send()
         except Exception as e:
-            # This prints the exact error to Render Logs
-            print(f"❌ Error sending email: {e}")
+            # This prints the exact error to Render Logs so we can debug
+            print(f"❌ Error sending email in background: {e}")
 
 def home(request):
+    # --- HANDLE CONTACT FORM ---
     if request.method == "POST":
         name = request.POST.get('name')
         email = request.POST.get('email')
@@ -37,41 +37,41 @@ def home(request):
                     'message_body': message, 'domain': current_site.domain
                 }
 
-                # --- FIX FOR 400 ERROR: ENSURE BODY IS NEVER EMPTY ---
-                # We define a default text message first.
-                text_content_admin = f"Name: {name}\nEmail: {email}\nMessage: {message}"
-                text_content_user = f"Hi {name},\nThanks for contacting me. I received your message: {subject}"
+                # --- 1. GUARANTEE TEXT CONTENT (Fixes Brevo 400 Error) ---
+                # We manually create the string so 'body' is never empty
+                text_content_admin = f"New Contact from Portfolio!\n\nName: {name}\nEmail: {email}\nSubject: {subject}\n\nMessage:\n{message}"
+                text_content_user = f"Hi {name},\n\nThanks for reaching out! I have received your message regarding '{subject}' and will get back to you shortly.\n\nBest,\nAkshat Singh"
 
-                # Try to load HTML, but don't crash if missing
+                # --- 2. TRY TO LOAD HTML (But don't crash if missing) ---
+                html_admin = None
+                html_user = None
                 try:
                     html_admin = render_to_string('emails/contact_admin.html', context)
                     html_user = render_to_string('emails/contact_user.html', context)
                 except Exception as e:
-                    print(f"⚠️ Template Warning: Could not load HTML templates: {e}")
-                    html_admin = None
-                    html_user = None
+                    print(f"⚠️ Template Warning: HTML templates not found ({e}). Sending text-only version.")
 
-                # 1. Admin Email
+                # --- 3. CONSTRUCT ADMIN EMAIL ---
                 msg_admin = EmailMultiAlternatives(
                     subject=f"Portfolio Contact: {subject}",
-                    body=text_content_admin, # Forced text content
+                    body=text_content_admin, # Always has content now
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     to=[settings.ADMIN_EMAIL]
                 )
                 if html_admin: 
                     msg_admin.attach_alternative(html_admin, "text/html")
 
-                # 2. User Email
+                # --- 4. CONSTRUCT USER EMAIL ---
                 msg_user = EmailMultiAlternatives(
                     subject="Thanks for contacting me!",
-                    body=text_content_user, # Forced text content
+                    body=text_content_user, # Always has content now
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     to=[email]
                 )
                 if html_user:
                     msg_user.attach_alternative(html_user, "text/html")
 
-                # Send in background
+                # --- 5. SEND IN BACKGROUND ---
                 EmailThread(msg_admin).start()
                 EmailThread(msg_user).start()
 
@@ -79,12 +79,12 @@ def home(request):
                 return redirect('home')
             
             except Exception as e:
-                print(f"General Error: {e}")
+                print(f"❌ General Error in view: {e}")
                 messages.error(request, "Error processing request.")
         else:
             messages.error(request, "Please fill in all fields.")
 
-    # ... (Keep the rest of your view code for About, Jobs, etc. exactly the same)
+    # --- FETCH DATA (Existing Code) ---
     about = About.objects.first()
     jobs = Experience.objects.order_by('-start_date')
     educations = Education.objects.order_by('-end_year')
