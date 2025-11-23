@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'portfolio',
     'ckeditor',
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -119,7 +120,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- EMAIL CONFIGURATION ---
 # Point to your new custom class
-EMAIL_BACKEND = 'portfolio.email_backend.RenderGmailBackend'
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+
+ANYMAIL = {
+    "BREVO_API_KEY": config('BREVO_API_KEY'),
+}
+
+# The email address you used to sign up for Brevo
+DEFAULT_FROM_EMAIL = "singhaksh2203@gmail.com"
+# Where you want to receive admin notifications
+ADMIN_EMAIL = "singhaksh2203@gmail.com"
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465    # SSL Port
