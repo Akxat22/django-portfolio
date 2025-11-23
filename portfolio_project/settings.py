@@ -116,9 +116,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # --- EMAIL CONFIGURATION ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-# Uses config() to read from .env locally or Render Env Vars in production
+
+# --- CHANGE THESE 3 LINES ---
+EMAIL_PORT = 465            # Changed from 587
+EMAIL_USE_TLS = False       # Changed from True
+EMAIL_USE_SSL = True        # Added this (Use SSL instead of TLS)
+
+# Keep reading from Environment Variables
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
