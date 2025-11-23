@@ -5,6 +5,17 @@ from pathlib import Path
 import os
 import dj_database_url
 from decouple import config, Csv
+import socket
+
+original_getaddrinfo = socket.getaddrinfo
+
+def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    # Force the address family to IPv4 (AF_INET)
+    if family == 0:
+        family = socket.AF_INET 
+    return original_getaddrinfo(host, port, family, type, proto, flags)
+
+socket.getaddrinfo = ipv4_getaddrinfo
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -114,11 +125,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # --- EMAIL CONFIGURATION ---
+# --- EMAIL CONFIGURATION ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465             # SSL Port
-EMAIL_USE_TLS = False        # TLS Off
-EMAIL_USE_SSL = True         # SSL On
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+# Use Port 587 + TLS (Standard for Gmail)
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False  # Turn SSL off
+
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
