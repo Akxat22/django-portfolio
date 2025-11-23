@@ -101,16 +101,5 @@
       "link": "https://www.linkedin.com/in/akshat-singh-a6a626240",
       "display_name": "LinkedIn"
     }
-  ],
-  "blog_posts": [
-    {
-      "title": "Test",
-      "slug": "test",
-      "author": "Akshat Singh",
-      "featured_image": "/media/blog_images/Screenshot_7.png",
-      "content": "test",
-      "excerpt": "test",
-      "published_at": "2025-10-18 18:47:47"
-    }
   ]
 }
