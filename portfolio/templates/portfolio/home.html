@@ -10,26 +10,33 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     
     <style>
+        :root {
+            --spotify-green: #1DB954;
+            --spotify-black: #121212;
+            --spotify-dark-gray: #181818;
+            --spotify-light-gray: #282828;
+            --spotify-text: #b3b3b3;
+            --spotify-white: #ffffff;
+        }
+
         body {
             font-family: "Montserrat", sans-serif;
             background-color: #000;
-            color: #b3b3b3;
+            color: var(--spotify-text);
+            overflow-x: hidden;
         }
-        /* On Desktop, we use a grid layout that mimics Spotify's */
+
+        /* Desktop Layout */
         @media (min-width: 768px) {
-            body {
-                overflow: hidden; /* Prevent body scroll on desktop */
-            }
+            body { overflow: hidden; }
             .spotify-app-grid {
                 display: grid;
-                grid-template-columns: 320px 1fr; /* Spotify has a slightly wider sidebar */
+                grid-template-columns: 280px 1fr;
                 grid-template-rows: 1fr auto;
-                grid-template-areas:
-                    "sidebar main-view"
-                    "now-playing-bar now-playing-bar";
+                grid-template-areas: "sidebar main-view" "now-playing-bar now-playing-bar";
                 height: 100vh;
                 gap: 8px;
                 padding: 8px;
@@ -39,854 +46,542 @@
             .now-playing-bar { grid-area: now-playing-bar; }
         }
 
+        /* --- SCROLLBARS --- */
         .main-content {
-            background-color: #121212;
+            background-color: var(--spotify-black);
             border-radius: 8px;
             overflow-y: auto;
             position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: hsla(0,0%,100%,.3) transparent;
         }
+        .main-content::-webkit-scrollbar { width: 12px; }
+        .main-content::-webkit-scrollbar-thumb { background-color: hsla(0,0%,100%,.3); border-radius: 10px; border: 4px solid transparent; background-clip: content-box; }
+        .main-content::-webkit-scrollbar-thumb:hover { background-color: hsla(0,0%,100%,.5); }
 
-        /* Custom scrollbar for a more authentic feel */
-        .main-content::-webkit-scrollbar,
-        .library-scroll-content::-webkit-scrollbar {
-            width: 14px;
-        }
-        .main-content::-webkit-scrollbar-thumb,
-        .library-scroll-content::-webkit-scrollbar-thumb {
-            background-color: hsla(0, 0%, 100%, 0.3);
-            border: 3px solid #121212;
-            border-radius: 10px;
-        }
-        .library-scroll-content::-webkit-scrollbar-thumb {
-            border-color: #1a1a1a; /* Match the hover bg */
-        }
-
-
-        /* Gradient at the top of the main content, a key Spotify feature */
+        /* --- HEADER & GRADIENTS --- */
         #header-gradient {
-            background: linear-gradient(to bottom, #222 0, #121212 380px);
-            transition: background 0.5s ease;
+            background: linear-gradient(to bottom, rgba(83, 83, 83, 0.8), var(--spotify-black) 400px);
+            transition: background 1s ease;
         }
 
-        .accent-color, .active-icon {
-            color: #1db954;
+        #main-header {
+            transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
         }
-        .bg-accent-color {
-            background-color: #1db954;
-        }
-        .hover-bg-accent-color:hover {
-            background-color: #1ed760;
-        }
-
-        /* --- NEW: Sidebar Library Styling --- */
-        .library-container {
-            position: relative; /* For scroll container */
-        }
-        .library-scroll-content {
-            padding-bottom: 2rem;
-        }
-        .library-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.5rem;
-            border-radius: 0.375rem; /* rounded-md */
-            transition: background-color 0.3s ease;
-        }
-        .library-item:hover {
-            background-color: #1A1A1A;
+        #main-header.scrolled {
+            background-color: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-
-        /* Project/Content card styling */
+        /* --- CARDS & HOVER EFFECTS --- */
         .content-card {
             background-color: #181818;
             transition: background-color 0.3s ease;
-            position: relative;
             cursor: pointer;
         }
         .content-card:hover {
             background-color: #282828;
         }
+        
         .play-button {
             opacity: 0;
             transform: translateY(8px);
-            transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
         }
         .content-card:hover .play-button {
             opacity: 1;
-            transform: translateY(0);
-            box-shadow: 0 8px 8px rgba(0,0,0,.3);
+            transform: translateY(0) scale(1);
+        }
+        .play-button:hover {
+            transform: scale(1.1) !important;
+            background-color: #1ed760;
         }
 
-        .project-placeholder {
-            background: linear-gradient(135deg, #333, #121212 70%);
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            border-radius: 0.375rem; /* rounded-md */
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 60px rgba(0,0,0,.5);
+        /* --- SIDEBAR --- */
+        .library-item {
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
-        .placeholder-text {
-            font-size: 1.25rem; font-weight: 700; color: #1ed760 ;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        .library-item:hover {
+            background-color: #1A1A1A;
+            color: #fff;
         }
 
-        /* Sidebar active link style */
-        .sidebar-link.active { color: #fff; }
-        .sidebar-link.active svg { fill: #fff; }
-
-        /* Mobile Nav active link style */
-        .mobile-nav-link.active {
-            color: #1db954;
-        }
-
-        /* Sticky header style */
-        #main-header {
-            transition: background-color 0.3s ease;
-        }
-        #main-header.scrolled {
-            background-color: rgba(10, 10, 10, 0.7);
-            backdrop-filter: blur(10px);
-        }
-
-        /* Player progress bar styling */
-        .progress-bar-container { cursor: pointer; }
-        .progress-bar { background-color: #5e5e5e; border-radius: 2px; display: flex; height: 4px; width: 100%; }
-        .progress-bar-inner { background-color: #b3b3b3; border-radius: 2px; height: 100%; position: relative; }
-        .progress-bar-container:hover .progress-bar-inner { background-color: #1db954; }
-        .progress-bar-inner .handle { background-color: #fff; border-radius: 50%; height: 12px; width: 12px; position: absolute; right: -6px; top: -4px; opacity: 0; transition: opacity 0.2s ease;}
+        /* --- PROGRESS BAR --- */
+        .progress-bar-container:hover .progress-bar-inner { background-color: var(--spotify-green); }
         .progress-bar-container:hover .handle { opacity: 1; }
-
-        /* --- BLOG LIST STYLES --- */
-        .blog-post-row {
-            transition: background-color 0.3s ease;
-            background-color: transparent;
+        
+        /* --- TYPOGRAPHY & BADGES --- */
+        .skill-tag {
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid transparent;
+            transition: all 0.2s;
         }
-        .blog-post-row:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        .blog-post-row .blog-post-title {
-            transition: color 0.3s ease;
-        }
-        .blog-post-row:hover .blog-post-title {
-            color: #1db954; /* Green accent on hover */
+        .skill-tag:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: #fff;
+            color: #fff;
         }
 
-        /* --- MODAL STYLES FOR BLOG CONTENT --- */
-        #project-modal .modal-content {
-            max-height: 90vh;
-        }
-        #project-modal #modal-description {
-            line-height: 1.6;
-            color: #b3b3b3;
-        }
-        /* This targets project descriptions, which are just <p> tags */
-        #project-modal #modal-description p:only-child {
-            text-align: center;
-        }
-        /* This targets rich text blog content */
-        #modal-description p {
-            margin-bottom: 1.25rem; /* 20px */
-        }
-        #modal-description h1,
-        #modal-description h2,
-        #modal-description h3,
-        #modal-description h4,
-        #modal-description h5,
-        #modal-description h6 {
-            color: #ffffff;
-            font-weight: 700;
-            margin-top: 2rem; /* 32px */
-            margin-bottom: 1rem; /* 16px */
-        }
-        #modal-description h1 { font-size: 2.25rem; } /* 36px */
-        #modal-description h2 { font-size: 1.875rem; } /* 30px */
-        #modal-description h3 { font-size: 1.5rem; } /* 24px */
-        #modal-description ul,
-        #modal-description ol {
-            margin-left: 1.5rem; /* 24px */
-            margin-bottom: 1.25rem; /* 20px */
-        }
-        #modal-description ul { list-style-type: disc; }
-        #modal-description ol { list-style-type: decimal; }
-        #modal-description li { margin-bottom: 0.5rem; } /* 8px */
-        #modal-description a {
-            color: #1db954;
-            text-decoration: underline;
-        }
-        #modal-description blockquote {
-            border-left: 4px solid #1db954;
-            padding-left: 1rem;
-            margin: 1.5rem 0;
-            font-style: italic;
-            color: #ffffff;
-        }
-        #modal-description pre {
-            background-color: #121212;
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-bottom: 1.25rem;
-        }
-        #modal-description code {
-            font-family: monospace;
-            background-color: #333;
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-        }
-        #modal-description pre code {
-            background-color: transparent;
-            padding: 0;
-        }
-
-        /* --- NEW: Skeleton Loader --- */
-        .skeleton-loader {
-            background-color: #282828;
-            position: relative;
-            overflow: hidden;
-        }
-        .skeleton-loader::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            transform: translateX(-100%);
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer {
-            100% {
-                transform: translateX(100%);
-            }
-        }
+        /* --- MODAL STYLING --- */
+        #modal-description h1, #modal-description h2, #modal-description h3 { color: white; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 700; }
+        #modal-description p { margin-bottom: 1em; line-height: 1.7; color: #d1d5db; }
+        #modal-description a { color: var(--spotify-green); text-decoration: underline; }
+        #modal-description ul { list-style: disc; margin-left: 1.5em; margin-bottom: 1em; }
     </style>
 </head>
-<body class="antialiased text-sm">
+<body class="antialiased text-sm selection:bg-[#1db954] selection:text-black">
+    
     <div class="spotify-app-grid">
         
         <aside class="sidebar hidden md:flex flex-col gap-2">
-            <div class="bg-[#121212] rounded-lg p-2">
-                <nav class="p-2 space-y-4">
-                    <a href="#home" class="sidebar-link flex items-center gap-5 font-bold text-gray-400 hover:text-white transition-colors duration-300 p-2 rounded-md">
-                        <svg role="img" height="24" width="24" viewBox="0 0 24 24" class="transition-all" fill="currentColor"><path d="M13.5 1.515a3 3 0 0 0-3 0L3 5.845a2 2 0 0 0-1 1.732V21a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6h4v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V7.577a2 2 0 0 0-1-1.732l-7.5-4.33z"></path></svg>
+            <div class="bg-[#121212] rounded-lg p-4">
+                <nav class="space-y-4">
+                    <a href="#home" class="sidebar-link flex items-center gap-4 font-bold text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33zm-2-1.732a3 3 0 0 1 3 0l7.5 4.33a2 2 0 0 1 1 1.732V21a1 1 0 0 1-1 1h-6.5a1 1 0 0 1-1-1v-6h-3v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.577a2 2 0 0 1 1-1.732l7.5-4.33z"/></svg>
                         Home
                     </a>
-                    <a href="#projects" class="sidebar-link flex items-center gap-5 font-bold text-gray-400 hover:text-white transition-colors duration-300 p-2 rounded-md">
-                        <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="currentColor" class="transition-all"><path d="M10.533 1.279a2.75 2.75 0 0 1 2.934 0l6.25 3.328a2.75 2.75 0 0 1 1.467 2.389v6.608a2.75 2.75 0 0 1-1.467 2.389l-6.25 3.328a2.75 2.75 0 0 1-2.934 0l-6.25-3.328a2.75 2.75 0 0 1-1.467-2.389V7.004a2.75 2.75 0 0 1 1.467-2.396l6.25-3.328zM12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5z"></path></svg>
+                    <a href="#projects" class="sidebar-link flex items-center gap-4 font-bold text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10.533 1.279a2.75 2.75 0 0 1 2.934 0l6.25 3.328a2.75 2.75 0 0 1 1.467 2.389v6.608a2.75 2.75 0 0 1-1.467 2.389l-6.25 3.328a2.75 2.75 0 0 1-2.934 0l-6.25-3.328a2.75 2.75 0 0 1-1.467-2.389V7.004a2.75 2.75 0 0 1 1.467-2.396l6.25-3.328zM12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5z"/></svg>
                         Projects
                     </a>
                 </nav>
             </div>
         
-            <div class="bg-[#121212] rounded-lg flex-grow flex flex-col library-container">
-                <div class="p-4 flex items-center justify-between sticky top-0 bg-[#121212] z-10">
-                    <h2 class="font-bold flex items-center gap-4 text-white">
-                        <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zm6 0a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zm6 0a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1z"></path>
-                        </svg>
+            <div class="bg-[#121212] rounded-lg flex-grow flex flex-col overflow-hidden">
+                <div class="p-4 shadow-md z-10">
+                    <h2 class="font-bold flex items-center gap-2 text-gray-400 hover:text-white transition-colors cursor-pointer">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zm6 0a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zm6 0a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1z"/></svg>
                         Your Library
                     </h2>
                 </div>
                 
-                <div class="px-2 overflow-y-auto library-scroll-content">
-                    <a href="#about" class="sidebar-link library-item">
-                        {% if about.profile_image %}<img src="{{ about.profile_image.url }}" class="w-12 h-12 rounded-full object-cover" alt="About Me"/>
-                        {% else %}<img src="https://placehold.co/48x48/181818/1DB954?text={{ about.name|first|upper }}" class="w-12 h-12 rounded-full object-cover" alt="About Me"/>{% endif %}
-                        <div><p class="font-bold text-white">About Me</p><p class="text-xs">Introduction</p></div>
-                    </a>
-                    <a href="#experience" class="sidebar-link library-item">
-                        <img src="https://placehold.co/48x48/181818/1DB954?text=Exp" class="w-12 h-12 rounded-md" alt="Experience"/>
-                        <div><p class="font-bold text-white">Experience</p><p class="text-xs">Work History</p></div>
-                    </a>
-                    <a href="#education" class="sidebar-link library-item">
-                        <img src="https://placehold.co/48x48/181818/1DB954?text=Edu" class="w-12 h-12 rounded-md" alt="Education"/>
-                        <div><p class="font-bold text-white">Education</p><p class="text-xs">Academic Background</p></div>
-                    </a>
-                    <a href="#blog" class="sidebar-link library-item">
-                        <img src="https://placehold.co/48x48/181818/1DB954?text=Blog" class="w-12 h-12 rounded-md" alt="Blog"/>
-                        <div><p class="font-bold text-white">Blog</p><p class="text-xs">Recent Posts</p></div>
-                    </a>
-                    
-                    <div class="p-4 mt-4 border-t border-gray-800">
-                        <h3 class="text-white font-bold mb-4">Contact</h3>
-                        <div class="space-y-3">
-                            {% if socials.email %}<a href="mailto:{{ socials.email }}" class="flex items-center gap-3 hover:text-white transition-colors duration-300">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                                <span>Email</span>
-                            </a>{% endif %}
-                            {% if socials.github %}<a href="{{ socials.github }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 hover:text-white transition-colors duration-300">
-                                 <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                                 <span>GitHub</span>
-                            </a>{% endif %}
-                            {% if socials.linkedin %}<a href="{{ socials.linkedin }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 hover:text-white transition-colors duration-300">
-                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                                <span>LinkedIn</span>
-                            </a>{% endif %}
+                <div class="flex-1 overflow-y-auto p-2 space-y-1 library-scroll-content">
+                    <a href="#about" class="library-item flex p-2 rounded-md gap-3">
+                        {% if about.profile_image %}
+                            <img src="{{ about.profile_image.url }}" class="w-12 h-12 rounded-md object-cover" alt="About"/>
+                        {% else %}
+                            <div class="w-12 h-12 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white">AM</div>
+                        {% endif %}
+                        <div class="flex flex-col justify-center">
+                            <p class="font-semibold text-white truncate">About Me</p>
+                            <p class="text-xs text-gray-400">Artist</p>
                         </div>
-                    </div>
+                    </a>
+                    <a href="#experience" class="library-item flex p-2 rounded-md gap-3">
+                        <div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4zm2 4h12v2H6V6zm0 4h12v2H6v-2zm0 4h8v2H6v-2z"/></svg></div>
+                        <div class="flex flex-col justify-center">
+                            <p class="font-semibold text-white truncate">Experience</p>
+                            <p class="text-xs text-gray-400">Folder</p>
+                        </div>
+                    </a>
+                    <a href="#education" class="library-item flex p-2 rounded-md gap-3">
+                        <div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg></div>
+                        <div class="flex flex-col justify-center">
+                            <p class="font-semibold text-white truncate">Education</p>
+                            <p class="text-xs text-gray-400">Folder</p>
+                        </div>
+                    </a>
+                    <a href="#blog" class="library-item flex p-2 rounded-md gap-3">
+                        <div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg></div>
+                        <div class="flex flex-col justify-center">
+                            <p class="font-semibold text-white truncate">Thoughts</p>
+                            <p class="text-xs text-gray-400">Blog</p>
+                        </div>
+                    </a>
                 </div>
             </div>
         </aside>
 
-        <main id="main-content" class="main-content h-screen md:h-auto pb-36 md:pb-0">
-            <header id="main-header" class="sticky top-0 z-10 p-4 flex items-center justify-between">
+        <main id="main-content" class="main-content h-screen md:h-auto pb-32 md:pb-0">
+            
+            <header id="main-header" class="sticky top-0 z-20 px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <button id="history-back" class="w-8 h-8 bg-black bg-opacity-70 rounded-full flex items-center justify-center cursor-not-allowed opacity-50">
-                        <svg role="img" height="16" width="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.03.47a.75.75 0 0 1 0 1.06L4.56 8l6.47 6.47a.75.75 0 1 1-1.06 1.06L2.44 8 9.97.47a.75.75 0 0 1 1.06 0z"></path></svg>
+                    <button id="history-back" class="w-8 h-8 bg-black/70 rounded-full flex items-center justify-center text-white hover:bg-black/90 transition">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
                     </button>
-                    <button id="history-forward" class="w-8 h-8 bg-black bg-opacity-70 rounded-full flex items-center justify-center cursor-not-allowed opacity-50">
-                        <svg role="img" height="16" width="16" viewBox="0 0 16 16"><path fill="currentColor" d="M4.97.47a.75.75 0 0 0 0 1.06L11.44 8l-6.47 6.47a.75.75 0 1 0 1.06 1.06L13.56 8 6.03.47a.75.75 0 0 0-1.06 0z"></path></svg>
+                    <button id="history-forward" class="w-8 h-8 bg-black/70 rounded-full flex items-center justify-center text-white hover:bg-black/90 transition opacity-50 cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
                     </button>
                 </div>
-                
+
                 {% if about %}
-                <div class="relative">
-                    <button id="user-menu-button" class="flex items-center gap-2 bg-black bg-opacity-70 rounded-full p-1 pr-2 hover:bg-gray-800">
-                        {% if about.profile_image %}<img src="{{ about.profile_image.url }}" class="w-7 h-7 rounded-full object-cover"/>
-                        {% else %}<img src="https://placehold.co/28x28/181818/1DB954?text={{ about.name|first|upper }}" class="w-7 h-7 rounded-full object-cover"/>{% endif %}
-                        <span class="text-white font-bold text-xs">{{ about.name }}</span>
-                        <svg role="img" height="16" width="16" viewBox="0 0 16 16" class="text-white"><path fill="currentColor" d="M13.03 6.03a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 1.06-1.06L8 9.94l3.97-3.97a.75.75 0 0 1 1.06 0z"></path></svg>
+                <div class="relative group">
+                    <button class="flex items-center gap-2 bg-black/70 rounded-full p-1 pr-3 hover:bg-[#282828] transition">
+                        {% if about.profile_image %}
+                        <img src="{{ about.profile_image.url }}" class="w-7 h-7 rounded-full object-cover"/>
+                        {% else %}
+                        <div class="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-black font-bold text-xs">{{ about.name|first }}</div>
+                        {% endif %}
+                        <span class="text-white font-bold text-sm hidden sm:block">{{ about.name }}</span>
                     </button>
-                    <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-[#282828] text-white rounded-md shadow-lg z-20">
-                        {% if socials.linkedin %}<a href="{{ socials.linkedin }}" target="_blank" class="block px-4 py-2 text-sm hover:bg-[#3e3e3e]">Profile</a>{% endif %}
-                        {% if socials.email %}<a href="mailto:{{ socials.email }}" class="block px-4 py-2 text-sm hover:bg-[#3e3e3e]">Contact</a>{% endif %}
+                    <div class="absolute right-0 top-full mt-2 w-48 bg-[#282828] rounded shadow-xl p-1 hidden group-hover:block hover:block">
+                        <a href="mailto:{{ socials.email }}" class="block px-3 py-2 text-sm text-gray-200 hover:bg-[#3E3E3E] rounded">Contact</a>
+                        <a href="{{ socials.github }}" target="_blank" class="block px-3 py-2 text-sm text-gray-200 hover:bg-[#3E3E3E] rounded">GitHub Profile</a>
                     </div>
                 </div>
                 {% endif %}
             </header>
 
             {% if about %}
-            <div id="header-gradient">
-                <div class="p-6 pt-16">
+            <div id="header-gradient" class="px-6 pb-6 pt-10 -mt-16 flex items-end min-h-[340px]">
+                <div class="flex flex-col md:flex-row gap-6 items-end w-full">
+                    <div class="flex-shrink-0 shadow-[0_4px_60px_rgba(0,0,0,0.5)]">
+                        {% if about.profile_image %}
+                        <img src="{{ about.profile_image.url }}" class="w-40 h-40 md:w-52 md:h-52 rounded-full md:rounded shadow-2xl object-cover" />
+                        {% else %}
+                        <div class="w-40 h-40 md:w-52 md:h-52 bg-gradient-to-br from-blue-600 to-green-400 rounded-full md:rounded shadow-2xl"></div>
+                        {% endif %}
+                    </div>
                     
-                    <section id="home" class="min-h-[50vh] md:min-h-[60vh] flex flex-col justify-center text-left -mt-10">
-                        <div class="max-w-4xl">
-                            <h1 id="greeting" class="text-3xl font-bold text-white mb-8">Good morning</h1>
-                            <h2 class="text-5xl md:text-8xl font-extrabold tracking-tighter leading-tight text-white">{{ about.name }}</h2>
-                            <p class="mt-6 text-lg md:text-xl text-gray-300 max-w-2xl">A <span class="text-white font-bold">{{ about.title }}</span> with a knack for developing efficient and scalable web applications.</p>
+                    <div class="flex flex-col gap-2 mb-2">
+                        <div class="verified-badge">
+                            <svg class="w-5 h-5 text-[#3d91f4] fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.3-6.3 1.5 1.5-7.8 7.8z"></path></svg>
+                            <span>Verified Artist</span>
                         </div>
-                    </section>
-                    
-                    <section id="projects" class="pt-24 pb-16">
-                        <div class="mb-8">
-                            <h2 class="text-3xl md:text-4xl font-bold text-white">My Projects</h2>
-                            <p class="mt-2 text-lg">A selection of my work.</p>
+                        <h1 class="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white">{{ about.name }}</h1>
+                        <div class="flex items-center gap-2 text-sm md:text-base text-gray-200 mt-2">
+                            <span>{{ about.title }}</span>
+                            <span class="w-1 h-1 bg-white rounded-full"></span>
+                            <span>{{ projects|length }} Projects</span>
                         </div>
-                        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                            {% for project in projects %}
-                            <div class="project-card content-card rounded-lg p-4 group" 
-                                 data-title="{{ project.title }}" 
-                                 data-image="{% if project.image %}{{ project.image.url }}{% endif %}"
-                                 data-placeholder-text="{{ project.title }}"
-                                 data-description="{{ project.long_description }}" 
-                                 data-short-desc="{{ project.short_description }}"
-                                 data-link="{{ project.link|default:'#' }}">
-                                <div class="relative">
-                                    {% if project.image %}<img src="{{ project.image.url }}" alt="{{ project.title }}" class="w-full h-auto object-cover rounded-md mb-4 shadow-lg aspect-square"/>
-                                    {% else %}<div class="project-placeholder"><h4 class="placeholder-text">{{ project.title }}</h4></div>{% endif %}
-                                    <button class="play-button absolute bottom-2 right-2 w-12 h-12 rounded-full bg-accent-color text-black flex items-center justify-center shadow-xl hover-bg-accent-color transform hover:scale-105">
-                                        <svg role="img" height="24" width="24" viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z" fill="currentColor"></path></svg>
-                                    </button>
-                                </div>
-                                <h3 class="text-lg font-semibold mb-1 text-white truncate">{{ project.title }}</h3>
-                                <p class="text-sm truncate">{{ project.short_description }}</p>
-                            </div>
-                            {% empty %}
-                                {% for i in "1234" %} <div class="content-card rounded-lg p-4">
-                                    <div class="skeleton-loader w-full aspect-square rounded-md mb-4"></div>
-                                    <div class="skeleton-loader w-3/4 h-6 rounded-md mb-2"></div>
-                                    <div class="skeleton-loader w-1/2 h-4 rounded-md"></div>
-                                </div>
-                                {% endfor %}
-                            {% endfor %}
-                        </div>
-                    </section>
-                    
-                    <section id="about" class="pt-24 pb-16">
-                        <div class="flex flex-col md:flex-row gap-10 items-center">
-                            <div class="w-2/3 max-w-xs mx-auto md:w-1/3 md:max-w-none md:mx-0 flex-shrink-0">
-                                {% if about.profile_image %}<img src="{{ about.profile_image.url }}" alt="A portrait of {{ about.name }}" class="rounded-full shadow-2xl w-full h-auto object-cover aspect-square" />
-                                {% else %}<img src="https://placehold.co/300x300/181818/1DB954?text={{ about.name|first|upper }}" alt="A portrait of {{ about.name }}" class="rounded-full shadow-2xl w-full h-auto object-cover aspect-square"/>{% endif %}
-                            </div>
-                            <div class="md:w-2/3">
-                                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">About Me</h2>
-                                <p class="mb-6 leading-relaxed">{{ about.description|linebreaks }}</p>
-                                <h3 class="text-xl font-bold text-white mb-3 mt-6">Skills</h3>
-                                <div class="flex flex-wrap gap-3">
-                                    {% for skill in about.skills.all %}<span class="bg-gray-800 text-gray-300 px-4 py-2 rounded-full text-xs font-bold">{{ skill.name }}</span>
-                                    {% empty %}<p>Skills coming soon...</p>{% endfor %}
-                                </div>
-<a href="{% url 'download_resume' %}" target="_blank"
-                           class="mt-8 inline-block px-6 py-3 bg-accent-color text-black text-sm font-bold rounded-full shadow-md hover-bg-accent-color transition-all duration-300 transform hover:scale-105">
-                            View & Save Resume
-                            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5 ml-1 -mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                        </a>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <section id="experience" class="pt-24 pb-16">
-                            <div class="mb-8"><h2 class="text-3xl md:text-4xl font-bold text-white">Experience</h2><p class="mt-2 text-lg">My professional journey.</p></div>
-                            <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {% for job in jobs %}
-                                <div class="bg-[#181818] hover:bg-[#282828] transition-colors rounded-lg p-4 group">
-                                    <div class="flex items-center gap-4 mb-4">
-                                        <img src="https://placehold.co/64x64/181818/FFFFFF?text={{ job.company|first }}" alt="{{ job.company }} Logo" class="w-16 h-16 rounded-md"/>
-                                        <div>
-                                            <h3 class="text-lg font-bold text-white">{{ job.company }}</h3>
-                                            <p class="text-sm">{{ job.role }}</p>
-                                            <p class="text-xs text-gray-400">{{ job.start_date }} - {{ job.end_date|default:"Present" }}</p>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm">{{ job.description }}</p>
-                                </div>
-                                {% empty %}<p>Work experience will be updated soon.</p>{% endfor %}
-                            </div>
-                    </section>
-        
-                    <section id="education" class="pt-24 pb-16">
-                           <div class="mb-8"><h2 class="text-3xl md:text-4xl font-bold text-white">Education</h2><p class="mt-2 text-lg">My academic background.</p></div>
-                            <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {% for edu in educations %}
-                                <div class="bg-[#181818] hover:bg-[#282828] transition-colors rounded-lg p-4 group">
-                                     <div class="flex items-center gap-4 mb-4">
-                                         <img src="https://placehold.co/64x64/181818/FFFFFF?text={{ edu.institution|slice:':3'|upper }}" alt="{{ edu.institution }} Logo" class="w-16 h-16 rounded-md"/>
-                                         <div>
-                                             <h3 class="text-lg font-bold text-white">{{ edu.institution }}</h3>
-                                             <p class="text-sm">{{ edu.degree }}</p>
-                                             <p class="text-xs text-gray-400">{{ edu.start_year }} - {{ edu.end_year }}</p>
-                                         </div>
-                                     </div>
-                                     <p class="text-sm">{{ edu.description }}</p>
-                                </div>
-                                {% empty %}<p>Education details will be updated soon.</p>{% endfor %}
-                            </div>
-                    </section>
-                    
-                    <section id="blog" class="pt-24 pb-16">
-                        <div class="mb-8">
-                            <h2 class="text-3xl md:text-4xl font-bold text-white">Recent Posts</h2>
-                            <p class="mt-2 text-lg">My latest articles and thoughts.</p>
-                        </div>
-                        
-                        <div class="flex flex-col space-y-2">
-                            {% for post in recent_posts %}
-                            <div class="blog-card content-card blog-post-row rounded-md p-3 flex items-center gap-4" 
-                                 data-title="{{ post.title }}" 
-                                 data-image="{% if post.featured_image %}{{ post.featured_image.url }}{% endif %}"
-                                 data-placeholder-text="{{ post.title|first }}"
-                                 data-description="{{ post.content|safe }}" 
-                                 data-link="#"> <div class="flex-shrink-0">
-                                    {% if post.featured_image %}
-                                        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-12 h-12 rounded object-cover">
-                                    {% else %}
-                                        <div class="w-12 h-12 rounded bg-gray-800 flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 12h6m-1-4h.01"></path></svg>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="flex-grow overflow-hidden">
-                                    <h3 class="blog-post-title text-white font-semibold truncate">{{ post.title }}</h3>
-                                    <p class="blog-post-metadata text-xs truncate">
-                                        {% if post.author %}{{ post.author.name }}{% endif %} • {{ post.published_at|date:"M j, Y" }}
-                                    </p>
-                                </div>
-                                
-                                <div class="hidden md:block flex-shrink-0 w-1/3">
-                                    <p class="text-sm truncate">{{ post.excerpt|default:"Click to read more..." }}</p>
-                                </div>
-                            </div>
-                            {% empty %}
-                            <p>No blog posts yet. Stay tuned!</p>
-                            {% endfor %}
-                        </div>
-                    </section>
-                    
-                    <footer class="border-t border-gray-800 mt-20">
-                        <div class="container mx-auto px-6 py-6 text-center text-gray-500">
-                            <p>&copy; {% now "Y" %} {{ about.name }}. All Rights Reserved.</p>
-                        </div>
-                    </footer>
-                </div>
-            </div>
-            {% else %}
-            <div class="p-10 text-center"><h1 class="text-3xl text-white font-bold">Welcome!</h1><p class="mt-4 text-lg">Go to the <a href="/admin" class="text-green-400 underline">admin panel</a> to set up your portfolio.</p></div>
-            {% endif %}
-
-        </main>
-
-        <footer class="now-playing-bar bg-[#181818] p-4 flex items-center justify-between border-t border-[#282828] md:bg-black md:border-none md:p-2 md:py-3">
-            <div class="flex items-center gap-4 w-1/3 min-w-[180px]">
-                <div id="now-playing-image-container" class="cursor-pointer">
-                    <div class="w-14 h-14 rounded-md bg-[#282828] flex items-center justify-center text-gray-500">
-                        <svg role="img" height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M10.533 1.279a2.75 2.75 0 0 1 2.934 0l6.25 3.328a2.75 2.75 0 0 1 1.467 2.389v6.608a2.75 2.75 0 0 1-1.467 2.389l-6.25 3.328a2.75 2.75 0 0 1-2.934 0l-6.25-3.328a2.75 2.75 0 0 1-1.467-2.389V7.004a2.75 2.75 0 0 1 1.467-2.396l6.25-3.328zM12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5z"></path>
-                        </svg>
                     </div>
                 </div>
-                <div class="hidden md:block">
-                    <h4 id="now-playing-title" class="font-bold text-white truncate">Select a Project</h4>
-                    <p id="now-playing-desc" class="text-sm truncate">Click a card to see details</p>
+            </div>
+
+            <div class="px-6 py-6 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-[#121212]">
+                <div class="flex items-center gap-6">
+                    <button onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})" 
+                            class="w-14 h-14 bg-[#1db954] rounded-full flex items-center justify-center hover:scale-105 hover:bg-[#1ed760] transition shadow-lg text-black">
+                        <svg class="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+                    </button>
+                    <a href="{% url 'download_resume' %}" class="border border-gray-500 text-white font-bold text-xs tracking-widest uppercase px-4 py-2 rounded hover:border-white hover:scale-105 transition">
+                        Resume
+                    </a>
+                    <div class="flex gap-4 text-gray-400">
+                         {% if socials.github %}<a href="{{ socials.github }}" target="_blank" class="hover:text-white"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>{% endif %}
+                         {% if socials.linkedin %}<a href="{{ socials.linkedin }}" target="_blank" class="hover:text-white"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>{% endif %}
+                    </div>
                 </div>
             </div>
 
-            <div class="flex flex-col items-center justify-center w-full md:w-2/5 max-w-[720px]">
-                <div class="flex items-center gap-4">
-                    <button class="text-gray-400 hover:text-white hidden md:block" id="prev-project-button" title="Previous Project">
-                        <svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M3.3 1a.7.7 0 0 1 .7.7v12.6a.7.7 0 0 1-1.4 0V1.7a.7.7 0 0 1 .7-.7zm9.896 1.696a.7.7 0 0 1 1.007.884L9.12 8l5.083 4.42a.7.7 0 0 1-1.007.884l-5.9-5.13a.7.7 0 0 1 0-1.148l5.9-5.13z"></path>
-                        </svg>
-                    </button>
-                    <button id="play-pause-button" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center transform hover:scale-105" title="Play/Pause">
-                        <svg role="img" height="24" width="24" viewBox="0 0 24 24" id="play-icon"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z" fill="currentColor"></path></svg>
-                        <svg role="img" height="24" width="24" viewBox="0 0 24 24" id="pause-icon" class="hidden"><path d="M5.7 3a.7.7 0 0 0-.7.7v16.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V3.7a.7.7 0 0 0-.7-.7H5.7zm10 0a.7.7 0 0 0-.7.7v16.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V3.7a.7.7 0 0 0-.7-.7h-2.6z" fill="currentColor"></path></svg>
-                    </button>
-                    <button class="text-gray-400 hover:text-white hidden md:block" id="next-project-button" title="Next Project">
-                        <svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M12.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 1.4 0V1.7a.7.7 0 0 0-.7-.7zm-9.896 1.696a.7.7 0 0 0-1.007.884L6.88 8l-5.083 4.42a.7.7 0 0 0 1.007.884l5.9-5.13a.7.7 0 0 0 0-1.148l-5.9-5.13z"></path>
-                        </svg>
-                    </button>
+            <div class="px-6 py-4 space-y-12">
+                
+                <section id="projects">
+                    <h2 class="text-2xl font-bold text-white mb-4 hover:underline cursor-pointer">Projects</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        {% for project in projects %}
+                        <div class="content-card p-4 rounded-md group relative"
+                             data-title="{{ project.title }}"
+                             data-short-desc="{{ project.short_description }}"
+                             data-image="{% if project.image %}{{ project.image.url }}{% endif %}"
+                             data-description="{{ project.long_description }}"
+                             data-link="{{ project.link|default:'#' }}">
+                             
+                            <div class="relative mb-4 shadow-lg rounded-md overflow-hidden">
+                                {% if project.image %}
+                                <img src="{{ project.image.url }}" class="w-full aspect-square object-cover" alt="{{ project.title }}">
+                                {% else %}
+                                <div class="w-full aspect-square bg-[#333] flex items-center justify-center text-gray-500 font-bold text-xl">{{ project.title|first }}</div>
+                                {% endif %}
+                                <div class="play-button absolute bottom-2 right-2 w-12 h-12 bg-[#1db954] rounded-full flex items-center justify-center text-black">
+                                    <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-white font-bold truncate mb-1">{{ project.title }}</h3>
+                            <p class="text-sm text-gray-400 line-clamp-2">{{ project.short_description }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section id="about">
+                    <h2 class="text-2xl font-bold text-white mb-4">About & Skills</h2>
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        <div class="lg:w-2/3">
+                            <p class="text-gray-300 leading-relaxed whitespace-pre-line">{{ about.description|linebreaksbr }}</p>
+                            
+                            <div class="mt-6">
+                                <h3 class="text-white font-bold mb-3">Tech Stack</h3>
+                                <div class="flex flex-wrap gap-2">
+                                    {% for skill in about.skills.all %}
+                                    <span class="skill-tag px-3 py-1 rounded-full text-sm text-gray-200 cursor-default">
+                                        {{ skill.name }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="experience">
+                    <h2 class="text-2xl font-bold text-white mb-4">Experience</h2>
+                    <div class="space-y-4">
+                        {% for job in jobs %}
+                        <div class="bg-[#181818] hover:bg-[#282828] transition-colors rounded-lg p-6 group cursor-default">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 text-[#1db954] w-6 mt-1 hidden sm:block">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2">
+                                        <h3 class="text-lg font-bold text-white group-hover:text-[#1db954] transition">{{ job.role }}</h3>
+                                        <span class="text-sm text-gray-400 font-mono">{{ job.start_date }} - {{ job.end_date|default:'Present' }}</span>
+                                    </div>
+                                    <h4 class="text-md text-gray-300 font-semibold mb-3">{{ job.company }}</h4>
+                                    <p class="text-sm text-gray-400 leading-relaxed">{{ job.description|linebreaksbr }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section id="education">
+                    <h2 class="text-2xl font-bold text-white mb-4">Education</h2>
+                    <div class="space-y-4">
+                        {% for edu in educations %}
+                        <div class="bg-[#181818] hover:bg-[#282828] transition-colors rounded-lg p-6 group cursor-default">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0 text-[#1db954] w-6 mt-1 hidden sm:block">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2">
+                                        <h3 class="text-lg font-bold text-white group-hover:text-[#1db954] transition">{{ edu.institution }}</h3>
+                                        <span class="text-sm text-gray-400 font-mono">{{ edu.start_year }} - {{ edu.end_year }}</span>
+                                    </div>
+                                    <h4 class="text-md text-gray-300 font-semibold mb-3">{{ edu.degree }}</h4>
+                                    <p class="text-sm text-gray-400 leading-relaxed">{{ edu.description|linebreaksbr }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section id="blog">
+                    <h2 class="text-2xl font-bold text-white mb-4">Thoughts</h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        {% for post in recent_posts %}
+                        <div class="blog-card content-card flex gap-4 p-4 rounded-md group items-center"
+                             data-title="{{ post.title }}"
+                             data-description="{{ post.content|safe }}">
+                             <div class="min-w-[64px] h-16 bg-[#333] rounded flex items-center justify-center text-gray-500">
+                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 12h6m-1-4h.01"></path></svg>
+                             </div>
+                             <div class="overflow-hidden">
+                                 <h3 class="text-white font-bold truncate group-hover:text-[#1db954] transition">{{ post.title }}</h3>
+                                 <p class="text-xs text-gray-400 mt-1">{{ post.published_at|date:"M d, Y" }}</p>
+                                 <p class="text-xs text-gray-500 mt-1 line-clamp-1">{{ post.excerpt|default:"Click to read more..." }}</p>
+                             </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <footer class="pt-10 pb-20 text-gray-400 text-sm">
+                    <hr class="border-[#282828] mb-6">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="mb-2 text-white">Follow</p>
+                            <div class="flex gap-4">
+                                <a href="#" class="hover:text-white hover:underline">LinkedIn</a>
+                                <a href="#" class="hover:text-white hover:underline">GitHub</a>
+                                <a href="#" class="hover:text-white hover:underline">Instagram</a>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p>&copy; {% now "Y" %} {{ about.name }}</p>
+                        </div>
+                    </div>
+                </footer>
+
+            </div>
+            {% endif %}
+        </main>
+
+        <footer class="now-playing-bar bg-[#181818] border-t border-[#282828] px-4 py-3 flex items-center justify-between z-30">
+            <div class="flex items-center gap-4 w-[30%]">
+                <div id="now-playing-img-wrapper" class="w-14 h-14 bg-[#282828] rounded shadow-sm flex items-center justify-center overflow-hidden">
+                    <svg class="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
                 </div>
-                <div class="w-full gap-2 items-center hidden md:flex">
-                    <span class="text-xs">0:00</span>
-                    <div class="progress-bar-container w-full"><div class="progress-bar"><div class="progress-bar-inner w-[0%]"><div class="handle"></div></div></div></div>
-                    <span class="text-xs">--:--</span>
+                <div class="hidden sm:block overflow-hidden">
+                    <h4 id="np-title" class="text-sm text-white font-semibold hover:underline cursor-pointer truncate">Select a project</h4>
+                    <p id="np-artist" class="text-xs text-gray-400 hover:underline cursor-pointer truncate">{{ about.name }}</p>
+                </div>
+                <button class="text-[#1db954] hover:text-[#1ed760] hidden lg:block"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+            </div>
+
+            <div class="flex flex-col items-center w-[40%] max-w-2xl">
+                <div class="flex items-center gap-6 mb-1">
+                    <button class="text-gray-400 hover:text-white"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M3.3 1a.7.7 0 0 1 .7.7v12.6a.7.7 0 0 1-1.4 0V1.7a.7.7 0 0 1 .7-.7zm9.896 1.696a.7.7 0 0 1 1.007.884L9.12 8l5.083 4.42a.7.7 0 0 1-1.007.884l-5.9-5.13a.7.7 0 0 1 0-1.148l5.9-5.13z"/></svg></button>
+                    <button id="master-play-btn" class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition">
+                        <svg id="icon-play" class="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg id="icon-pause" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    <button class="text-gray-400 hover:text-white"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M12.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 1.4 0V1.7a.7.7 0 0 0-.7-.7zm-9.896 1.696a.7.7 0 0 0-1.007.884L6.88 8l-5.083 4.42a.7.7 0 0 0 1.007.884l5.9-5.13a.7.7 0 0 0 0-1.148l-5.9-5.13z"/></svg></button>
+                </div>
+                <div class="flex items-center gap-2 w-full text-xs text-gray-400 font-mono">
+                    <span>0:00</span>
+                    <div class="h-1 bg-[#535353] rounded-full w-full group cursor-pointer progress-bar-container relative">
+                        <div class="h-full bg-white rounded-full w-[0%] progress-bar-inner relative">
+                            <div class="w-3 h-3 bg-white rounded-full absolute -right-1.5 -top-1 shadow opacity-0 handle"></div>
+                        </div>
+                    </div>
+                    <span>2:30</span>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 w-1/3 justify-end min-w-[180px]">
-                <button class="text-gray-400 hover:text-white hidden md:block" title="Open for Opportunities">
-                    <svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M1.69 2A4.582 4.582 0 0 1 8 2.023 4.583 4.583 0 0 1 14.31 2c1.89 0 3.498 1.962 3.498 4.695 0 4.81-5.508 7.323-7.23 8.632a.75.75 0 0 1-.578 0C8.007 14.018 2.5 11.505 2.5 6.695c0-2.733 1.608-4.695 3.498-4.695z"></path>
-                    </svg>
-                </button>
-                <button class="text-gray-400 hover:text-white hidden md:block" title="Volume">
-                    <svg role="img" height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.033l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 4.29V5.56a2.75 2.75 0 0 1 0 4.88z"></path></svg>
-                </button>
-                <div class="w-24 hidden md:block">
-                    <div class="progress-bar-container w-full"><div class="progress-bar"><div class="progress-bar-inner w-[100%]"><div class="handle"></div></div></div></div>
+            <div class="flex items-center justify-end gap-3 w-[30%]">
+                <div id="equalizer" class="equalizer opacity-0 transition-opacity">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                </div>
+                <div class="w-24 h-1 bg-[#535353] rounded-full hidden md:block cursor-pointer group">
+                    <div class="h-full bg-white group-hover:bg-[#1db954] w-[70%] rounded-full"></div>
                 </div>
             </div>
         </footer>
+
+        <nav class="md:hidden fixed bottom-0 w-full bg-gradient-to-t from-black via-[#121212] to-transparent p-4 pb-6 flex justify-around items-center z-50 backdrop-blur-sm">
+            <a href="#home" class="flex flex-col items-center text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33z"/></svg><span class="text-[10px] mt-1">Home</span></a>
+            <a href="#projects" class="flex flex-col items-center text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10.533 1.279a2.75 2.75 0 0 1 2.934 0l6.25 3.328a2.75 2.75 0 0 1 1.467 2.389v6.608a2.75 2.75 0 0 1-1.467 2.389l-6.25 3.328a2.75 2.75 0 0 1-2.934 0l-6.25-3.328a2.75 2.75 0 0 1-1.467-2.389V7.004a2.75 2.75 0 0 1 1.467-2.396l6.25-3.328z"/></svg><span class="text-[10px] mt-1">Projects</span></a>
+            <a href="#education" class="flex flex-col items-center text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg><span class="text-[10px] mt-1">Edu</span></a>
+        </nav>
+        
     </div>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black to-transparent flex justify-around items-center h-20 z-20 pt-4">
-        <a href="#home" class="mobile-nav-link flex flex-col items-center justify-center text-xs p-2 w-full">
-            <svg role="img" height="24" width="24" viewBox="0 0 24 24" class="mb-1"><path fill="currentColor" d="M13.5 1.515a3 3 0 0 0-3 0L3 5.845a2 2 0 0 0-1 1.732V21a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6h4v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V7.577a2 2 0 0 0-1-1.732l-7.5-4.33z"></path></svg>
-            <span>Home</span>
-        </a>
-        <a href="#projects" class="mobile-nav-link flex flex-col items-center justify-center text-xs p-2 w-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-            <span>Projects</span>
-        </a>
-        <a href="#about" class="mobile-nav-link flex flex-col items-center justify-center text-xs p-2 w-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            <span>About</span>
-        </a>
-        <a href="#blog" class="mobile-nav-link flex flex-col items-center justify-center text-xs p-2 w-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-            <span>Blog</span>
-        </a>
-    </nav>
-    
-    <div id="project-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
-        <div class="bg-[#282828] rounded-lg shadow-xl w-full max-w-2xl max-h-full overflow-y-auto text-white relative modal-content">
-             <button id="close-modal-button" class="absolute top-4 right-4 text-gray-400 hover:text-white z-10">
-                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-             </button>
-             <div class="p-6 md:p-10">
-                 <div id="modal-image-container" class="w-full md:w-2/3 mx-auto mb-6"></div>
-                 <h2 id="modal-title" class="text-3xl font-bold mb-6 text-center"></h2>
-                 
-                 <div id="modal-description" class="mb-6"></div> 
-                 
-                 <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="block w-max mx-auto px-6 py-2 bg-accent-color text-black text-sm font-bold rounded-full shadow-md hover-bg-accent-color transition-all duration-300 transform hover:scale-105">
-                     View Project
-                 </a>
-             </div>
+    <div id="project-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-[#282828] w-full max-w-3xl max-h-[90vh] rounded-lg shadow-2xl overflow-hidden flex flex-col relative animate-fade-in-up">
+            <button id="close-modal" class="absolute top-4 right-4 z-20 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            
+            <div class="flex-1 overflow-y-auto">
+                <div id="modal-header" class="h-64 w-full bg-gray-700 relative">
+                    <img id="modal-img" src="" class="w-full h-full object-cover opacity-60">
+                    <div class="absolute bottom-0 left-0 p-8 bg-gradient-to-t from-[#282828] to-transparent w-full">
+                        <h2 id="modal-title" class="text-4xl font-black text-white shadow-black drop-shadow-md"></h2>
+                    </div>
+                </div>
+                <div class="p-8">
+                    <div id="modal-description" class="prose prose-invert max-w-none"></div>
+                    <div class="mt-8 pt-6 border-t border-gray-700 flex justify-end">
+                        <a id="modal-link" href="#" target="_blank" class="bg-[#1db954] hover:bg-[#1ed760] text-black font-bold py-3 px-8 rounded-full transform hover:scale-105 transition shadow-lg">
+                            View Project
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-    
-            // --- Globals & State ---
-            const mainContent = document.getElementById("main-content");
-            const mainHeader = document.getElementById("main-header");
-            const greetingEl = document.getElementById("greeting");
-            
-            const projectCards = document.querySelectorAll('.project-card');
-            const blogCards = document.querySelectorAll('.blog-card');
-            
-            let isPlaying = false;
-            let currentProjectIndex = -1;
-            let projectCardList = Array.from(projectCards); // For next/prev logic
-
-            // --- "Now Playing" Bar Elements ---
-            const nowPlayingTitle = document.getElementById('now-playing-title');
-            const nowPlayingDesc = document.getElementById('now-playing-desc');
-            const nowPlayingImageContainer = document.getElementById('now-playing-image-container');
-            const playPauseBtn = document.getElementById('play-pause-button');
-            const playIcon = document.getElementById('play-icon');
-            const pauseIcon = document.getElementById('pause-icon');
-            
-            // --- Modal Elements ---
-            const modal = document.getElementById('project-modal');
-            const closeModalButton = document.getElementById('close-modal-button');
-            const modalTitle = document.getElementById('modal-title');
-            const modalDescription = document.getElementById('modal-description');
-            const modalLink = document.getElementById('modal-link');
-            const modalImageContainer = document.getElementById('modal-image-container');
+        // --- DYNAMIC GRADIENT GENERATOR ---
+        const colors = [
+            'rgba(83, 83, 83, 0.8)', // Grey
+            'rgba(132, 0, 231, 0.6)', // Purple
+            'rgba(232, 17, 91, 0.6)', // Pink
+            'rgba(20, 138, 8, 0.6)',  // Green
+            'rgba(0, 100, 80, 0.6)',  // Teal
+            'rgba(80, 55, 80, 0.8)'   // Maroon
+        ];
+        document.getElementById('header-gradient').style.background = 
+            `linear-gradient(to bottom, ${colors[Math.floor(Math.random() * colors.length)]}, #121212 400px)`;
 
 
-            // ===================================
-            // INITIALIZATION
-            // ===================================
+        // --- DOM ELEMENTS ---
+        const mainContent = document.getElementById('main-content');
+        const header = document.getElementById('main-header');
+        const modal = document.getElementById('project-modal');
+        const cards = document.querySelectorAll('.content-card');
+        
+        // --- PLAYER LOGIC ---
+        const playBtn = document.getElementById('master-play-btn');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        const equalizer = document.getElementById('equalizer');
+        let isPlaying = false;
 
-            // 1. Set Greeting
-            if (greetingEl) {
-                const hour = new Date().getHours();
-                if (hour < 12) greetingEl.textContent = "Good morning";
-                else if (hour < 18) greetingEl.textContent = "Good afternoon";
-                else greetingEl.textContent = "Good evening";
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            if(isPlaying) {
+                iconPlay.classList.add('hidden');
+                iconPause.classList.remove('hidden');
+                equalizer.classList.remove('opacity-0');
+            } else {
+                iconPlay.classList.remove('hidden');
+                iconPause.classList.add('hidden');
+                equalizer.classList.add('opacity-0');
             }
-
-            // 2. Set up Header Scroll Effect
-            if (mainContent && mainHeader) {
-                mainContent.addEventListener("scroll", () => {
-                    mainHeader.classList.toggle("scrolled", mainContent.scrollTop > 10);
-                });
-            }
-
-            // ===================================
-            // PLAYER LOGIC
-            // ===================================
-
-            function togglePlayState(play) {
-                isPlaying = play;
-                playIcon.classList.toggle('hidden', isPlaying);
-                pauseIcon.classList.toggle('hidden', !isPlaying);
-            }
-
-            function updateNowPlaying(card) {
-                if (!card) return;
-                
-                nowPlayingTitle.textContent = card.dataset.title;
-                nowPlayingDesc.textContent = card.dataset.shortDesc || 'Project Details';
-
-                nowPlayingImageContainer.innerHTML = ''; // Clear
-                let artwork;
-                if (card.dataset.image) {
-                    artwork = document.createElement('img');
-                    artwork.src = card.dataset.image;
-                    artwork.alt = card.dataset.title;
-                    artwork.className = "w-14 h-14 rounded-md object-cover";
-                } else {
-                    artwork = document.createElement('div');
-                    artwork.className = "w-14 h-14 rounded-md bg-[#282828] flex items-center justify-center text-white font-bold";
-                    artwork.textContent = card.dataset.placeholderText.substring(0, 3);
-                }
-                nowPlayingImageContainer.appendChild(artwork);
-                togglePlayState(true);
-            }
-            
-            function playProject(index) {
-                if (index >= 0 && index < projectCardList.length) {
-                    currentProjectIndex = index;
-                    updateNowPlaying(projectCardList[currentProjectIndex]);
-                }
-            }
-            
-            playPauseBtn.addEventListener('click', () => {
-                 if (currentProjectIndex !== -1) { // Only toggle if a project is loaded
-                     togglePlayState(!isPlaying);
-                 }
-            });
-
-            document.getElementById('next-project-button').addEventListener('click', () => {
-                if (projectCardList.length === 0) return;
-                const nextIndex = (currentProjectIndex + 1) % projectCardList.length;
-                playProject(nextIndex);
-            });
-            
-            document.getElementById('prev-project-button').addEventListener('click', () => {
-                if (projectCardList.length === 0) return;
-                const prevIndex = (currentProjectIndex - 1 + projectCardList.length) % projectCardList.length;
-                playProject(prevIndex);
-            });
-
-            // ===================================
-            // MODAL LOGIC
-            // ===================================
-
-            function openModal(card) {
-                modalTitle.textContent = card.dataset.title;
-                
-                // This line is key: it inserts the raw HTML from the 'data-description'
-                // This is why your blog content formatting (h1, p, etc.) works.
-                modalDescription.innerHTML = card.dataset.description;
-
-                // Populate Image
-                modalImageContainer.innerHTML = ''; // Clear previous
-                if (card.dataset.image) {
-                    const img = document.createElement('img');
-                    img.src = card.dataset.image;
-                    img.className = 'w-full rounded-lg shadow-lg';
-                    modalImageContainer.appendChild(img);
-                } else {
-                    const placeholder = document.createElement('div');
-                    placeholder.className = 'project-placeholder h-full';
-                    placeholder.innerHTML = `<h4 class="placeholder-text">${card.dataset.placeholderText}</h4>`;
-                    modalImageContainer.appendChild(placeholder);
-                }
-
-                // Show/Hide Project Link
-                const link = card.dataset.link;
-                if (link && link !== "#") {
-                    modalLink.href = link;
-                    modalLink.style.display = 'block';
-                } else {
-                    modalLink.style.display = 'none';
-                }
-                
-                modal.classList.remove('hidden');
-            }
-            
-            const closeModal = () => modal.classList.add('hidden');
-            
-            closeModalButton.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                // Close if clicking on the dark background, but not the content
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
-
-
-            // ===================================
-            // CARD CLICK EVENT LISTENERS
-            // ===================================
-
-            // --- Project Card Clicks ---
-            projectCards.forEach((card, index) => {
-                card.addEventListener('click', (e) => {
-                    const playButton = card.querySelector('.play-button');
-                    
-                    // Check if the click was *on* the play button or *inside* it (the SVG)
-                    if (playButton && playButton.contains(e.target)) {
-                        e.stopPropagation(); // Prevent modal from opening
-                        playProject(index);
-                    } else {
-                        // Click was on the card itself, not the play button
-                        openModal(card);
-                    }
-                });
-            });
-
-            // --- Blog Card Clicks ---
-            blogCards.forEach((card) => {
-                card.addEventListener('click', () => {
-                    // Blogs *only* open the modal. They don't have play buttons.
-                    openModal(card);
-                });
-            });
-
-            // ===================================
-            // NAVIGATION & SCROLL LOGIC
-            // ===================================
-
-            // --- User Menu Dropdown ---
-            const userMenuButton = document.getElementById('user-menu-button');
-            const userMenu = document.getElementById('user-menu');
-            if(userMenuButton) {
-                userMenuButton.addEventListener('click', (e) => { 
-                    e.stopPropagation(); 
-                    userMenu.classList.toggle('hidden'); 
-                });
-                document.addEventListener('click', () => userMenu.classList.add('hidden'));
-            }
-            
-            // --- Active Section Highlighting ---
-            const sections = document.querySelectorAll("section[id]");
-            const navLinks = document.querySelectorAll(".sidebar-link, .mobile-nav-link");
-            const sectionIds = Array.from(sections).map(sec => sec.id);
-            let currentSectionId = sectionIds[0];
-
-            const observer = new IntersectionObserver( (entries) => {
-                 entries.forEach((entry) => {
-                     if (entry.isIntersecting) {
-                         const id = entry.target.getAttribute('id');
-                         currentSectionId = id;
-                         navLinks.forEach((link) => {
-                             link.classList.remove("active");
-                             if (link.getAttribute("href") === `#${id}`) {
-                                 link.classList.add("active");
-                             }
-                         });
-                     }
-                 });
-             }, { root: mainContent, rootMargin: "-40% 0px -60% 0px" });
-
-            sections.forEach(section => observer.observe(section));
-
-            // --- Smooth Scroll for Nav Links ---
-            navLinks.forEach((anchor) => {
-              anchor.addEventListener("click", function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute("href");
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    mainContent.scrollTo({ 
-                        top: targetElement.offsetTop - 80, // Offset for sticky header
-                        behavior: "smooth" 
-                    });
-                }
-              });
-            });
-
-            // --- Faux History Buttons (Scroll to prev/next section) ---
-            const historyBackBtn = document.getElementById('history-back');
-            const historyForwardBtn = document.getElementById('history-forward');
-
-            function updateHistoryButtons(currentIndex) {
-                historyBackBtn.classList.toggle('opacity-50', currentIndex === 0);
-                historyBackBtn.classList.toggle('cursor-not-allowed', currentIndex === 0);
-                historyForwardBtn.classList.toggle('opacity-50', currentIndex === sectionIds.length - 1);
-                historyForwardBtn.classList.toggle('cursor-not-allowed', currentIndex === sectionIds.length - 1);
-            }
-            
-            // Update buttons on scroll
-            mainContent.addEventListener('scroll', () => {
-                const currentIndex = sectionIds.indexOf(currentSectionId);
-                updateHistoryButtons(currentIndex);
-            });
-
-            historyBackBtn.addEventListener('click', () => {
-                let currentIndex = sectionIds.indexOf(currentSectionId);
-                if (currentIndex > 0) {
-                    document.querySelector(`a[href="#${sectionIds[currentIndex - 1]}"]`).click();
-                }
-            });
-            
-            historyForwardBtn.addEventListener('click', () => {
-                let currentIndex = sectionIds.indexOf(currentSectionId);
-                if (currentIndex < sectionIds.length - 1) {
-                    document.querySelector(`a[href="#${sectionIds[currentIndex + 1]}"]`).click();
-                }
-            });
-
-            // Initialize history buttons
-            updateHistoryButtons(0);
         });
+
+        // --- SCROLL HEADER ---
+        mainContent.addEventListener('scroll', () => {
+            if (mainContent.scrollTop > 60) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // --- MODAL LOGIC ---
+        const openModal = (card) => {
+            document.getElementById('modal-title').innerText = card.dataset.title;
+            document.getElementById('modal-description').innerHTML = card.dataset.description;
+            
+            const imgUrl = card.dataset.image;
+            const imgEl = document.getElementById('modal-img');
+            
+            if(imgUrl) {
+                imgEl.src = imgUrl;
+                imgEl.style.display = 'block';
+            } else {
+                imgEl.style.display = 'none'; // Hide if no image
+            }
+            
+            const link = card.dataset.link;
+            const linkBtn = document.getElementById('modal-link');
+            if(link && link !== '#') {
+                linkBtn.href = link;
+                linkBtn.classList.remove('hidden');
+            } else {
+                linkBtn.classList.add('hidden');
+            }
+
+            // Update Player Bar
+            document.getElementById('np-title').innerText = card.dataset.title;
+            
+            modal.classList.remove('hidden');
+        };
+
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if(e.target.closest('.play-button')) {
+                    e.stopPropagation();
+                    playBtn.click();
+                    document.getElementById('np-title').innerText = card.dataset.title;
+                    const img = card.dataset.image;
+                    if(img) {
+                        document.getElementById('now-playing-img-wrapper').innerHTML = `<img src="${img}" class="w-full h-full object-cover">`;
+                    }
+                } else {
+                    openModal(card);
+                }
+            });
+        });
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) modal.classList.add('hidden');
+        });
+
     </script>
 </body>
 </html>
