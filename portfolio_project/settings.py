@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from decouple import config
 from pathlib import Path
 import os
 import dj_database_url  # Import this
@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get(
     'SECRET_KEY', 
     'django-insecure-e9k%!nfmg0+5)4=mzel#&!79p+nf((odsb&)02h6zo6n+sbhb7'
 )
-
+SECRET_KEY = config('SECRET_KEY')
 # --- FIX 2: DEBUG MODE ---
 # DEBUG is False in production (on Render) and True locally.
 # This checks if the 'RENDER' environment variable is set.
@@ -144,8 +144,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'automailakshatsingh@gmail.com' # Your full email address
-EMAIL_HOST_PASSWORD = 'lyru zxup qxyi eyrb' # Not your regular password
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')          # <--- Reading from .env
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # <--- Reading from .env
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # --- Admin Email ---
 # Set the email address where you want to receive notifications
