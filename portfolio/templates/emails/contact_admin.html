@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #fff; padding: 20px; border-left: 5px solid #1DB954; }
+        .label { font-size: 12px; color: #888; text-transform: uppercase; margin-top: 15px; }
+        .value { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .message-box { background: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 5px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>New Portfolio Inquiry</h2>
+        
+        <div class="label">Name</div>
+        <div class="value">{{ name }}</div>
+
+        <div class="label">Email</div>
+        <div class="value"><a href="mailto:{{ email }}">{{ email }}</a></div>
+
+        <div class="label">Subject</div>
+        <div class="value">{{ subject }}</div>
+
+        <div class="label">Message</div>
+        <div class="message-box">{{ message_body }}</div>
+    </div>
+</body>
+</html>

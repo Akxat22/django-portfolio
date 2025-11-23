@@ -1,18 +1,87 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
 from .models import *
-from django.http import HttpResponse 
-# (Delete fpdf, xhtml2pdf, and any other PDF imports)
-
 
 def home(request):
-    # ... (this view is fine, no changes) ...
-    about = About.objects.first() 
+    """
+    Main portfolio view handling display and contact form submission.
+    """
+    # --- HANDLE CONTACT FORM SUBMISSION ---
+    if request.method == "POST":
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+
+        if name and email and message:
+            try:
+                # Prepare context for email templates
+                current_site = get_current_site(request)
+                email_context = {
+                    'name': name,
+                    'email': email,
+                    'subject': subject,
+                    'message_body': message,
+                    'domain': current_site.domain
+                }
+
+                # 1. Send Admin Email (To You)
+                html_admin = render_to_string('emails/contact_admin.html', email_context)
+                text_admin = strip_tags(html_admin) # Plain text fallback
+                
+                msg_admin = EmailMultiAlternatives(
+                    subject=f"Portfolio Contact: {subject} from {name}",
+                    body=text_admin,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[settings.EMAIL_HOST_USER]
+                )
+                msg_admin.attach_alternative(html_admin, "text/html")
+                msg_admin.send()
+
+                # 2. Send User Confirmation Email (To Visitor)
+                html_user = render_to_string('emails/contact_user.html', email_context)
+                text_user = strip_tags(html_user)
+                
+                msg_user = EmailMultiAlternatives(
+                    subject="Thanks for contacting me!",
+                    body=text_user,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[email]
+                )
+                msg_user.attach_alternative(html_user, "text/html")
+                msg_user.send()
+
+                messages.success(request, "Message sent successfully! I'll be in touch soon.")
+                return redirect('home')
+            
+            except Exception as e:
+                # Log error in console for debugging
+                print(f"Email Error: {e}") 
+                messages.error(request, "Error sending email. Please try again later.")
+        else:
+            messages.error(request, "Please fill in all required fields.")
+
+    # --- FETCH DATA FOR PORTFOLIO ---
+    about = About.objects.first()
     jobs = Experience.objects.order_by('-start_date')
     educations = Education.objects.order_by('-end_year')
     projects = Project.objects.all()
     social_links = SocialLink.objects.all()
     recent_posts = BlogPost.objects.order_by('-published_at')[:5]
-    socials = {link.platform: link.link for link in social_links}
+    
+    # Process social links
+    socials = {}
+    for link in social_links:
+        socials[link.platform] = link.link
+        # Create a raw email link (without 'mailto:') for display text if needed
+        if link.platform == 'email':
+            socials['email_link'] = link.link.replace('mailto:', '')
+
     context = {
         'about': about,
         'jobs': jobs,
@@ -24,49 +93,39 @@ def home(request):
     return render(request, 'portfolio/home.html', context)
 
 
-# --- DELETE the old 'download_resume_pdf' function ---
-# --- ADD THIS NEW VIEW ---
-
 def resume_html_view(request):
     """
-    Renders a standalone HTML page for the resume.
+    Renders the printable resume page.
     """
-    # 1. Fetch all the data
     about = About.objects.first()
     if not about:
-        return HttpResponse("No 'About' data found. Please add data in the admin panel.", status=404)
+        return HttpResponse("No 'About' data found.", status=404)
 
     skills = about.skills.all()
     jobs = Experience.objects.order_by('-start_date')
     educations = Education.objects.order_by('-end_year')
+    projects = Project.objects.all()
     social_links = SocialLink.objects.all()
     
-    # --- ADD THIS LINE ---
-    projects = Project.objects.all() # <-- This line was missing
-
     socials = {}
     for link in social_links:
         socials[link.platform] = link.link
         if link.platform == 'email':
             socials['email_link'] = link.link.replace('mailto:', '')
 
-    # 2. Define the context for the HTML template
     context = {
         'about': about,
         'skills': skills,
         'jobs': jobs,
         'educations': educations,
         'socials': socials,
-        'projects': projects, # <-- Add 'projects' to the context
+        'projects': projects,
     }
 
-    # 3. Render the new HTML page
     return render(request, 'portfolio/resume_page.html', context)
-# --- END OF NEW VIEW ---
 
 
 def custom_404(request, exception):
-    # ... (this view is fine, no changes) ...
     about = About.objects.first()
     social_links = SocialLink.objects.all()
     socials = {link.platform: link.link for link in social_links}
@@ -75,10 +134,3 @@ def custom_404(request, exception):
         'socials': socials,
     }
     return render(request, 'portfolio/404.html', context, status=404)
-
-
-
-
-
-
-

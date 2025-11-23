@@ -3,239 +3,265 @@
 <head>
     <meta charset="UTF-8" />
     <title>{{ about.name }} - Resume</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
-        /* --- Base Styles (for screen) --- */
+        /* --- RESET & BASE --- */
         body {
-            font-family: Arial, sans-serif;
-            font-size: 11pt;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 10.5pt; /* Slightly smaller base font for efficiency */
             line-height: 1.4;
-            color: #333;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 40px;
-            border: 1px solid #ddd;
+            color: #222;
+            background: #555;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
+        /* --- BUTTON --- */
         #download-button {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 30px;
+            padding: 10px 25px;
+            margin-bottom: 20px;
             background-color: #1db954;
-            color: #000;
+            color: white;
             font-weight: bold;
-            font-size: 14pt;
             border: none;
-            border-radius: 8px;
+            border-radius: 50px;
             cursor: pointer;
-            text-align: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        #download-button:hover {
-            background-color: #1ed760;
+        #download-button:hover { background-color: #1ed760; }
+
+        /* --- PAPER SHEET --- */
+        #resume-content {
+            background: white;
+            width: 210mm; /* A4 Width */
+            min-height: 296mm; /* A4 Height */
+            padding: 0.5in; /* Standard printable margin */
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
 
-        /* --- Header --- */
-        .header {
+        /* --- HEADER --- */
+        header {
             text-align: center;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
         h1 {
-            font-size: 26pt;
-            margin: 0 0 5px 0;
-            color: #000;
-        }
-        .header h4 {
-            font-size: 16pt;
-            font-weight: 500;
-            color: #333;
             margin: 0;
+            text-transform: uppercase;
+            font-size: 24pt;
+            letter-spacing: 1px;
         }
-        .contact-info {
-            font-size: 10pt;
-            color: #333;
-            margin-top: 10px;
+        .role {
+            font-size: 12pt;
+            color: #555;
+            margin: 5px 0;
+            font-weight: 500;
         }
-        .contact-info a {
+        .contact-line {
+            font-size: 9pt;
+            margin-top: 5px;
+        }
+        .contact-line span {
+            margin: 0 8px;
+            color: #ccc;
+        }
+        .contact-line a {
             color: #333;
             text-decoration: none;
-            margin: 0 10px;
-        }
-        .contact-info a:hover {
-            text-decoration: underline;
         }
 
-        /* --- Section Styling --- */
-        .section {
-            margin-bottom: 20px;
+        /* --- SECTIONS --- */
+        section {
+            margin-bottom: 12px; /* Tight spacing between sections */
         }
         h2 {
-            font-size: 14pt;
-            color: #000;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
+            font-size: 12pt;
             text-transform: uppercase;
-        }
-
-        /* --- Item Styling --- */
-        .item {
-            margin-bottom: 15px;
-        }
-        h3 {
-            font-size: 13pt;
-            color: #000;
-            margin: 0;
-        }
-        .item-subhead {
-            font-size: 11pt;
+            border-bottom: 1px solid #ccc;
+            margin: 0 0 8px 0;
+            padding-bottom: 2px;
             color: #333;
-            font-weight: bold;
-            margin: 2px 0;
         }
-        .item-date {
-            font-style: italic;
-            color: #555;
-            font-size: 10pt;
-            margin-bottom: 5px;
+
+        /* --- ENTRIES (Jobs/Projects) --- */
+        .entry {
+            margin-bottom: 10px;
+            page-break-inside: avoid; /* Don't cut items in half */
         }
-        .description {
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .entry-title {
             font-size: 11pt;
+            font-weight: bold;
+            color: #000;
         }
-        
-        .skills-list {
-            list-style: disc;
-            padding-left: 20px;
-            margin: 0;
-            overflow: hidden;
+        .entry-date {
+            font-size: 9pt;
+            font-style: italic;
+            color: #666;
+            white-space: nowrap;
         }
-        .skills-list li {
-            width: 45%;
-            float: left;
-            margin-bottom: 5px;
+        .entry-subtitle {
+            font-size: 10pt;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 2px;
+        }
+        .entry-desc {
+            font-size: 10pt;
+            text-align: justify;
+            color: #333;
         }
 
-        /* -------------------------------------------
-        --- 1-PAGE-PDF COMPRESSION STYLES ---
-        -------------------------------------------
-        */
+        /* --- SKILLS (Horizontal List) --- */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .skill-item {
+            font-size: 9.5pt;
+            background-color: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* --- PDF PRINT RULES --- */
         @media print {
-            #download-button {
-                display: none; /* Hide the button */
-            }
-            body {
-                border: none;
-                margin: 0;
-                padding: 0;
-                max-width: 100%;
-                /* --- Compression --- */
-                font-size: 10pt;  /* Reduced from 11pt */
-                line-height: 1.3; /* Reduced from 1.4 */
-            }
-            
-            /* --- Squeeze Header --- */
-            .header {
-                padding-bottom: 10px; /* Reduced from 15px */
-                margin-bottom: 15px; /* Reduced from 20px */
-            }
-            h1 {
-                font-size: 22pt; /* Reduced from 26pt */
-            }
-            .header h4 {
-                font-size: 14pt; /* Reduced from 16pt */
-            }
-            .contact-info {
-                margin-top: 8px;
-            }
-
-            /* --- Squeeze Sections --- */
-            .section {
-                margin-bottom: 12px; /* Reduced from 20px */
-            }
-            h2 {
-                font-size: 13pt; /* Reduced from 14pt */
-                margin-bottom: 10px; /* Reduced from 15px */
-                padding-bottom: 3px;  /* Reduced from 5px */
-            }
-            
-            /* --- Squeeze Items --- */
-            .item {
-                margin-bottom: 10px; /* Reduced from 15px */
-            }
-            h3 {
-                font-size: 12pt; /* Reduced from 13pt */
-            }
-            .item-subhead {
-                font-size: 10pt;
-            }
-            .item-date {
-                margin-bottom: 3px; /* Reduced from 5px */
-            }
-            .skills-list li {
-                margin-bottom: 3px;
-            }
-            .description {
-                font-size: 10pt;
-            }
+            body { background: none; padding: 0; margin: 0; }
+            #download-button { display: none; }
+            #resume-content { box-shadow: none; margin: 0; width: 100%; height: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <button id="download-button" onclick="window.print();">
-        Download as PDF (or Print)
+    <button id="download-button" onclick="generatePDF()">
+        Download PDF
     </button>
 
-    <div class="header">
-        <h1>{{ about.name }}</h1>
-        <h4>{{ about.title }}</h4>
-        <div class="contact-info">
-            {% if socials.email %}<a href="{{ socials.email }}">{{ socials.email_link }}</a>{% endif %}
-            {% if socials.linkedin %}<span>&bull;</span> <a href="{{ socials.linkedin }}" target="_blank">LinkedIn</a>{% endif %}
-            {% if socials.github %}<span>&bull;</span> <a href="{{ socials.github }}" target="_blank">GitHub</a>{% endif %}
-        </div>
-    </div>
-
-    <div class="section" id="summary">
-        <h2>Professional Summary</h2>
-        <p class="description">{{ about.description|linebreaksbr }}</p>
-    </div>
-
-    <div class="section" id="skills">
-        <h2>Skills</h2>
-        <ul class="skills-list">
-            {% for skill in skills %}
-                <li>{{ skill.name }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="section" id="experience">
-        <h2>Experience</h2>
-        {% for job in jobs %}
-            <div class="item">
-                <h3>{{ job.role }}</h3>
-                <div class="item-subhead">{{ job.company }} | {{ job.location }}</div>
-                <div class="item-date">{{ job.start_date }} - {{ job.end_date|default:"Present" }}</div>
-                <div class="description">{{ job.description|linebreaksbr }}</div>
-            </div>
-        {% endfor %}
-    </div>
-
-    <div classs="section" id="education">
-        <h2>Education</h2>
-        {% for edu in educations %}
-            <div class="item">
-                <h3>{{ edu.degree }}</h3>
-                <div class="item-subhead">{{ edu.institution }}</div>
-                <div class="item-date">{{ edu.start_year }} - {{ edu.end_year }}</div>
-                {% if edu.description %}
-                <div class="description">{{ edu.description|linebreaksbr }}</div>
+    <div id="resume-content">
+        
+        <header>
+            <h1>{{ about.name }}</h1>
+            <div class="role">{{ about.title }}</div>
+            <div class="contact-line">
+                {% if socials.email %}
+                    <a href="{{ socials.email }}">{{ socials.email_link }}</a>
+                {% endif %}
+                {% if socials.linkedin %}
+                    <span>|</span> <a href="{{ socials.linkedin }}">LinkedIn</a>
+                {% endif %}
+                {% if socials.github %}
+                    <span>|</span> <a href="{{ socials.github }}">GitHub</a>
                 {% endif %}
             </div>
-        {% endfor %}
+        </header>
+
+        {% if about.description %}
+        <section>
+            <h2>Professional Summary</h2>
+            <div class="entry-desc">{{ about.description }}</div>
+        </section>
+        {% endif %}
+
+        {% if skills %}
+        <section>
+            <h2>Technical Skills</h2>
+            <div class="skills-container">
+                {% for skill in skills %}
+                    <span class="skill-item">{{ skill.name }}</span>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if projects %}
+        <section>
+            <h2>Projects</h2>
+            {% for project in projects %}
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title">{{ project.title }}</div>
+                    <div class="entry-date">Project</div>
+                </div>
+                <div class="entry-desc">{{ project.short_description }}</div>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        {% if jobs %}
+        <section>
+            <h2>Experience</h2>
+            {% for job in jobs %}
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title">{{ job.role }}</div>
+                    <div class="entry-date">{{ job.start_date }} – {{ job.end_date|default:"Present" }}</div>
+                </div>
+                <div class="entry-subtitle">{{ job.company }} {% if job.location %}| {{ job.location }}{% endif %}</div>
+                <div class="entry-desc">
+                    {{ job.description|linebreaksbr }}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        {% if educations %}
+        <section>
+            <h2>Education</h2>
+            {% for edu in educations %}
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title">{{ edu.institution }}</div>
+                    <div class="entry-date">{{ edu.start_year }} – {{ edu.end_year }}</div>
+                </div>
+                <div class="entry-subtitle">{{ edu.degree }}</div>
+                {% if edu.description %}
+                <div class="entry-desc">{{ edu.description }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
     </div>
+
+    <script>
+        function generatePDF() {
+            const element = document.getElementById('resume-content');
+            const button = document.getElementById('download-button');
+            
+            button.innerText = "Generating PDF...";
+            button.disabled = true;
+
+            const opt = {
+                margin:       0, // CSS handles the padding inside #resume-content
+                filename:     '{{ about.name|slugify }}_Resume.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                button.innerText = "Download PDF";
+                button.disabled = false;
+            });
+        }
+    </script>
 
 </body>
 </html>
