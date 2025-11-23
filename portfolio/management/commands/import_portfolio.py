@@ -8,14 +8,14 @@ class Command(BaseCommand):
     help = 'Import portfolio data from data.json'
 
     def handle(self, *args, **kwargs):
-        # 1. Locate data.json in the root of the project (same level as manage.py)
+        # 1. Locate data.json in the root of the project
         file_path = os.path.join(settings.BASE_DIR, 'data.json')
         
         if not os.path.exists(file_path):
             self.stdout.write(self.style.ERROR(f'File not found: {file_path}'))
             return
 
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             data = json.load(file)
 
         self.stdout.write('Importing data...')
@@ -30,8 +30,6 @@ class Command(BaseCommand):
                     'name': about_data.get('name', 'My Name'),
                     'title': about_data.get('title', 'Developer'),
                     'description': about_data.get('description', ''),
-                    # Note: We skip profile_image because importing images from URLs 
-                    # requires downloading. We rely on template fallbacks.
                 }
             )
             
@@ -45,14 +43,29 @@ class Command(BaseCommand):
             about.skills.set(current_skills)
             self.stdout.write(self.style.SUCCESS(f'Updated About section for {about.name}'))
 
-        # --- IMPORT SOCIAL LINKS ---
-        socials = data.get('social_links', {})
-        for platform, link in socials.items():
-            SocialLink.objects.update_or_create(
-                platform=platform,
-                defaults={'link': link}
-            )
-        self.stdout.write(self.style.SUCCESS(f'Updated {len(socials)} Social Links'))
+        # --- IMPORT SOCIAL LINKS (FIXED) ---
+        socials = data.get('social_links', [])
+        
+        # Case A: JSON is a List [{"platform": "github", "link": "..."}]
+        if isinstance(socials, list):
+            for item in socials:
+                platform = item.get('platform')
+                link = item.get('link')
+                if platform and link:
+                    SocialLink.objects.update_or_create(
+                        platform=platform,
+                        defaults={'link': link}
+                    )
+        
+        # Case B: JSON is a Dictionary {"github": "...", "linkedin": "..."}
+        elif isinstance(socials, dict):
+            for platform, link in socials.items():
+                SocialLink.objects.update_or_create(
+                    platform=platform,
+                    defaults={'link': link}
+                )
+        
+        self.stdout.write(self.style.SUCCESS('Updated Social Links'))
 
         # --- IMPORT PROJECTS ---
         projects = data.get('projects', [])
