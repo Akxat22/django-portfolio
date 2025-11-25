@@ -82,41 +82,103 @@
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* --- RESUME MODAL SPECIFIC STYLES --- */
-        #resume-paper {
+        /* --- MODERN RESUME STYLE (Two Column) --- */
+        #resume-paper-modern {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: white;
-            color: #222;
-            width: 210mm; /* A4 Width on Desktop */
+            color: #333;
+            width: 210mm;
             min-height: 296mm;
-            padding: 40px;
             box-sizing: border-box;
             margin: 20px auto;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: flex; /* Creates the columns */
+            overflow: hidden;
             text-align: left;
         }
 
-        /* Resume Internals */
-        #resume-paper h1 { color: #000; font-size: 24pt; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
-        #resume-paper .resume-role { color: #555; font-size: 12pt; margin: 5px 0; font-weight: 500; }
-        #resume-paper .resume-contact { font-size: 9pt; color: #666; margin-top: 5px; }
-        #resume-paper .resume-contact a { color: #333; text-decoration: none; }
-        #resume-paper h2 { font-size: 12pt; text-transform: uppercase; border-bottom: 1px solid #ccc; margin: 15px 0 8px 0; padding-bottom: 2px; color: #333; font-weight: 700; }
-        #resume-paper .resume-entry { margin-bottom: 12px; }
-        #resume-paper .resume-header { display: flex; justify-content: space-between; align-items: baseline; }
-        #resume-paper .resume-title { font-size: 11pt; font-weight: bold; color: #000; }
-        #resume-paper .resume-date { font-size: 9pt; font-style: italic; color: #666; }
-        #resume-paper .resume-subtitle { font-size: 10pt; font-weight: 600; color: #444; margin-bottom: 2px; }
-        #resume-paper .resume-desc { font-size: 10pt; color: #333; line-height: 1.4; text-align: justify; }
-        #resume-paper .resume-skills { display: flex; flex-wrap: wrap; gap: 6px; }
-        #resume-paper .resume-skill-tag { font-size: 9pt; background: #f0f0f0; padding: 2px 8px; border-radius: 4px; border: 1px solid #e0e0e0; color: #333; }
+        /* Left Column (Darker/Sidebar) */
+        .resume-left-col {
+            width: 32%;
+            background-color: #f4f4f5;
+            padding: 30px 20px;
+            border-right: 1px solid #e4e4e7;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
 
-        /* Mobile Resume Adjustments */
+        /* Right Column (Main Content) */
+        .resume-right-col {
+            width: 68%;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Typography & Elements */
+        .mod-header h1 {
+            margin: 0;
+            font-size: 28pt;
+            line-height: 1.1;
+            color: #18181b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .mod-header .mod-role {
+            font-size: 14pt;
+            color: #1DB954; /* Spotify Green Accent */
+            font-weight: 600;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+
+        .mod-section h2 {
+            font-size: 11pt;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #52525b;
+            border-bottom: 2px solid #1DB954;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            margin-top: 0;
+            font-weight: 700;
+        }
+
+        /* Contact Info */
+        .mod-contact-item {
+            font-size: 9pt;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+        .mod-contact-item a { color: #333; text-decoration: none; }
+
+        /* Experience & Projects */
+        .mod-entry { margin-bottom: 15px; }
+        .mod-entry-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+        .mod-title { font-weight: 700; font-size: 11pt; color: #000; }
+        .mod-date { font-size: 9pt; color: #71717a; font-style: italic; }
+        .mod-company { font-size: 10pt; font-weight: 600; color: #3f3f46; margin-bottom: 4px; }
+        .mod-desc { font-size: 9.5pt; line-height: 1.5; color: #333; text-align: justify; }
+
+        /* Skills Tags */
+        .mod-skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+        .mod-skill-tag {
+            background: #fff;
+            border: 1px solid #d4d4d8;
+            padding: 4px 8px;
+            font-size: 8.5pt;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        /* Mobile responsiveness for the paper preview */
         @media (max-width: 768px) {
-            #resume-paper { width: 100%; min-height: auto; padding: 20px; margin: 0; border-radius: 0; }
-            #resume-paper h1 { font-size: 20pt; }
-            #resume-paper .resume-header { flex-direction: column; }
-            #resume-paper .resume-date { margin-bottom: 4px; }
+            #resume-paper-modern { width: 100%; min-height: auto; flex-direction: column; padding: 0; }
+            .resume-left-col, .resume-right-col { width: 100%; border-right: none; padding: 20px; }
+            .resume-left-col { background-color: #f4f4f5; }
         }
     </style>
 </head>
@@ -544,96 +606,110 @@
         </div>
 
         <div class="flex-1 w-full overflow-y-auto pb-20 md:pb-4" id="resume-scroll-container">
-            <div id="resume-paper">
-                <div class="resume-header-section text-center border-b-2 border-[#333] pb-2 mb-4">
-                    <h1>{{ about.name }}</h1>
-                    <div class="resume-role">{{ about.title }}</div>
-                    <div class="resume-contact">
+            
+            <div id="resume-paper-modern">
+                
+                <aside class="resume-left-col">
+                    
+                    <div class="mod-section">
+                        <h2>Contact</h2>
                         {% if socials.email_link %}
+                        <div class="mod-contact-item">
+                            <strong>Email:</strong><br>
                             <a href="mailto:{{ socials.email_link }}">{{ socials.email_link }}</a>
+                        </div>
                         {% endif %}
                         {% if socials.linkedin %}
-                            <span>|</span> <a href="{{ socials.linkedin }}">LinkedIn</a>
+                        <div class="mod-contact-item">
+                            <strong>LinkedIn:</strong><br>
+                            <a href="{{ socials.linkedin }}">View Profile</a>
+                        </div>
                         {% endif %}
                         {% if socials.github %}
-                            <span>|</span> <a href="{{ socials.github }}">GitHub</a>
+                        <div class="mod-contact-item">
+                            <strong>GitHub:</strong><br>
+                            <a href="{{ socials.github }}">View Profile</a>
+                        </div>
                         {% endif %}
                     </div>
-                </div>
 
-                {% if about.description %}
-                <div class="resume-section">
-                    <h2>About Me</h2>
-                    <div class="resume-desc">{{ about.description }}</div>
-                </div>
-                {% endif %}
-
-                {% if skills %}
-                <div class="resume-section">
-                    <h2>Technical Skills</h2>
-                    <div class="resume-skills">
-                        {% for skill in skills %}
-                            <span class="resume-skill-tag">{{ skill.name }}</span>
+                    {% if educations %}
+                    <div class="mod-section">
+                        <h2>Education</h2>
+                        {% for edu in educations %}
+                        <div class="mod-entry">
+                            <div class="mod-title">{{ edu.institution }}</div>
+                            <div class="mod-company">{{ edu.degree }}</div>
+                            <div class="mod-date">{{ edu.start_year }} – {{ edu.end_year }}</div>
+                        </div>
                         {% endfor %}
                     </div>
-                </div>
-                {% endif %}
+                    {% endif %}
 
-                {% if projects %}
-                <div class="resume-section">
-                    <h2>Projects</h2>
-                    {% for project in projects %}
-                    <div class="resume-entry">
-                        <div class="resume-header">
-                            <div class="resume-title">{{ project.title }}</div>
-                            <div class="resume-date">Project</div>
+                    {% if about.skills.all %}
+                    <div class="mod-section">
+                        <h2>Skills</h2>
+                        <div class="mod-skills-grid">
+                            {% for skill in about.skills.all %}
+                                <span class="mod-skill-tag">{{ skill.name }}</span>
+                            {% endfor %}
                         </div>
-                        <div class="resume-desc">{{ project.short_description }}</div>
                     </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+                    {% endif %}
+                </aside>
 
-                {% if jobs %}
-                <div class="resume-section">
-                    <h2>Experience</h2>
-                    {% for job in jobs %}
-                    <div class="resume-entry">
-                        <div class="resume-header">
-                            <div class="resume-title">{{ job.role }}</div>
-                            <div class="resume-date">{{ job.start_date }} – {{ job.end_date|default:"Present" }}</div>
-                        </div>
-                        <div class="resume-subtitle">{{ job.company }} {% if job.location %}| {{ job.location }}{% endif %}</div>
-                        <div class="resume-desc">{{ job.description|linebreaksbr }}</div>
+                <main class="resume-right-col">
+                    
+                    <div class="mod-header">
+                        <h1>{{ about.name }}</h1>
+                        <div class="mod-role">{{ about.title }}</div>
                     </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
 
-                {% if educations %}
-                <div class="resume-section">
-                    <h2>Education</h2>
-                    {% for edu in educations %}
-                    <div class="resume-entry">
-                        <div class="resume-header">
-                            <div class="resume-title">{{ edu.institution }}</div>
-                            <div class="resume-date">{{ edu.start_year }} – {{ edu.end_year }}</div>
-                        </div>
-                        <div class="resume-subtitle">{{ edu.degree }}</div>
-                        {% if edu.description %}
-                        <div class="resume-desc">{{ edu.description }}</div>
-                        {% endif %}
+                    {% if about.description %}
+                    <div class="mod-section">
+                        <h2>About Me</h2>
+                        <div class="mod-desc">{{ about.description }}</div>
                     </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+                    {% endif %}
+
+                    {% if jobs %}
+                    <div class="mod-section">
+                        <h2>Experience</h2>
+                        {% for job in jobs %}
+                        <div class="mod-entry">
+                            <div class="mod-entry-header">
+                                <span class="mod-title">{{ job.role }}</span>
+                                <span class="mod-date">{{ job.start_date }} – {{ job.end_date|default:"Present" }}</span>
+                            </div>
+                            <div class="mod-company">{{ job.company }} {% if job.location %}| {{ job.location }}{% endif %}</div>
+                            <div class="mod-desc">{{ job.description|linebreaksbr }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if projects %}
+                    <div class="mod-section">
+                        <h2>Projects</h2>
+                        {% for project in projects %}
+                        <div class="mod-entry">
+                            <div class="mod-entry-header">
+                                <span class="mod-title">{{ project.title }}</span>
+                                <span class="mod-date">Project</span>
+                            </div>
+                            <div class="mod-desc">{{ project.short_description }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                </main>
             </div>
-        </div>
+            </div>
     </div>
 
     <script>
         // --- VIBRANT SPOTIFY PALETTE ---
-        // Updated colors to be more saturated and vibrant
         const colors = [
             'rgba(83, 83, 83, 0.9)',    // Grey
             'rgba(65, 0, 245, 0.8)',    // Electric Purple
@@ -777,7 +853,8 @@
 
         // PDF Generation
         function generatePDF() {
-            const element = document.getElementById('resume-paper');
+            // TARGET THE NEW MODERN LAYOUT ID
+            const element = document.getElementById('resume-paper-modern'); 
             const buttonText = document.getElementById('pdf-btn-text');
             const originalText = buttonText.innerText;
             
@@ -791,15 +868,19 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
+            // Mobile layout fix for PDF generation
             const originalWidth = element.style.width;
             if(window.innerWidth < 768) {
                 element.style.width = '210mm'; 
+                // Ensure sidebar stays side-by-side for PDF even on mobile
+                element.style.flexDirection = 'row'; 
             }
 
             html2pdf().set(opt).from(element).save().then(() => {
                 buttonText.innerText = originalText;
                 if(window.innerWidth < 768) {
                     element.style.width = '100%'; 
+                    element.style.flexDirection = 'column'; // Reset for user view
                 }
             });
         }
