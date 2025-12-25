@@ -1,695 +1,695 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>{{ about.name|default:'My' }} - Portfolio</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
-    
-    <style>
-        /* --- MAIN PORTFOLIO STYLES (SPOTIFY THEME) --- */
-        :root { --spotify-green: #1DB954; --spotify-black: #121212; --spotify-dark-gray: #181818; --spotify-light-gray: #282828; --spotify-text: #b3b3b3; --spotify-white: #ffffff; }
+    {% load static %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>{{ about.name|default:'My' }} - Portfolio</title>
         
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: "Montserrat", sans-serif; color: var(--spotify-text); }
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
         
-        /* Layout & Grid */
-        .spotify-app-grid { display: flex; flex-direction: column; height: 100%; width: 100%; }
-        @media (min-width: 768px) { 
-            .spotify-app-grid { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: 1fr auto; grid-template-areas: "sidebar main-view" "now-playing-bar now-playing-bar"; gap: 8px; padding: 8px; } 
-            .sidebar { grid-area: sidebar; } .main-content { grid-area: main-view; } .now-playing-bar { grid-area: now-playing-bar; } 
-        }
-
-        /* Scrollbars */
-        .main-content { background-color: var(--spotify-black); border-radius: 8px; overflow-y: auto; position: relative; scrollbar-width: thin; scrollbar-color: hsla(0,0%,100%,.3) transparent; flex-grow: 1; scroll-behavior: smooth; }
-        .main-content::-webkit-scrollbar { width: 12px; }
-        .main-content::-webkit-scrollbar-thumb { background-color: hsla(0,0%,100%,.3); border-radius: 10px; border: 4px solid transparent; background-clip: content-box; }
-        .main-content::-webkit-scrollbar-thumb:hover { background-color: hsla(0,0%,100%,.5); }
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
         
-        /* Sticky Header Fix */
-        section { scroll-margin-top: 90px; }
+        <style>
+            /* --- MAIN PORTFOLIO STYLES (SPOTIFY THEME) --- */
+            :root { --spotify-green: #1DB954; --spotify-black: #121212; --spotify-dark-gray: #181818; --spotify-light-gray: #282828; --spotify-text: #b3b3b3; --spotify-white: #ffffff; }
+            
+            html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: "Montserrat", sans-serif; color: var(--spotify-text); }
+            
+            /* Layout & Grid */
+            .spotify-app-grid { display: flex; flex-direction: column; height: 100%; width: 100%; }
+            @media (min-width: 768px) { 
+                .spotify-app-grid { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: 1fr auto; grid-template-areas: "sidebar main-view" "now-playing-bar now-playing-bar"; gap: 8px; padding: 8px; } 
+                .sidebar { grid-area: sidebar; } .main-content { grid-area: main-view; } .now-playing-bar { grid-area: now-playing-bar; } 
+            }
 
-        /* Header Gradient */
-        #header-gradient { background: linear-gradient(to bottom, rgba(83, 83, 83, 0.8), var(--spotify-black) 400px); transition: background 1s ease; }
-        #main-header { transition: background-color 0.3s ease, backdrop-filter 0.3s ease; }
-        #main-header.scrolled { background-color: rgba(18, 18, 18, 0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+            /* Scrollbars */
+            .main-content { background-color: var(--spotify-black); border-radius: 8px; overflow-y: auto; position: relative; scrollbar-width: thin; scrollbar-color: hsla(0,0%,100%,.3) transparent; flex-grow: 1; scroll-behavior: smooth; }
+            .main-content::-webkit-scrollbar { width: 12px; }
+            .main-content::-webkit-scrollbar-thumb { background-color: hsla(0,0%,100%,.3); border-radius: 10px; border: 4px solid transparent; background-clip: content-box; }
+            .main-content::-webkit-scrollbar-thumb:hover { background-color: hsla(0,0%,100%,.5); }
+            
+            /* Sticky Header Fix */
+            section { scroll-margin-top: 90px; }
 
-        /* Cards & Interactions */
-        .content-card { background-color: #181818; transition: background-color 0.3s ease; cursor: pointer; }
-        .content-card:hover { background-color: #282828; }
-        .play-button { opacity: 0; transform: translateY(8px); box-shadow: 0 8px 8px rgba(0,0,0,0.3); transition: all 0.3s ease; }
-        .content-card:hover .play-button { opacity: 1; transform: translateY(0) scale(1); }
-        .play-button:hover { transform: scale(1.1) !important; background-color: #1ed760; }
+            /* Header Gradient */
+            #header-gradient { background: linear-gradient(to bottom, rgba(83, 83, 83, 0.8), var(--spotify-black) 400px); transition: background 1s ease; }
+            #main-header { transition: background-color 0.3s ease, backdrop-filter 0.3s ease; }
+            #main-header.scrolled { background-color: rgba(18, 18, 18, 0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+            /* Cards & Interactions */
+            .content-card { background-color: #181818; transition: background-color 0.3s ease; cursor: pointer; }
+            .content-card:hover { background-color: #282828; }
+            .play-button { opacity: 0; transform: translateY(8px); box-shadow: 0 8px 8px rgba(0,0,0,0.3); transition: all 0.3s ease; }
+            .content-card:hover .play-button { opacity: 1; transform: translateY(0) scale(1); }
+            .play-button:hover { transform: scale(1.1) !important; background-color: #1ed760; }
+            
+            @media (max-width: 768px) {
+                .play-button { opacity: 1; transform: translateY(0); width: 40px; height: 40px; bottom: 8px; right: 8px; }
+                .content-card:active { transform: scale(0.98); }
+            }
+
+            /* Sidebar & Utilities */
+            .library-item { transition: background-color 0.2s ease, color 0.2s ease; }
+            .library-item:hover { background-color: #1A1A1A; color: #fff; }
+            .skill-tag { background-color: rgba(255,255,255,0.1); border: 1px solid transparent; transition: all 0.2s; }
+            .skill-tag:hover { background-color: rgba(255,255,255,0.2); border-color: #fff; color: #fff; }
+
+            /* Equalizer Animation */
+            .equalizer { display: flex; gap: 2px; align-items: flex-end; height: 12px; width: 16px; }
+            .bar { width: 3px; background-color: var(--spotify-green); animation: equalize 1s infinite ease-in-out; }
+            .bar:nth-child(1) { animation-delay: -0.4s; height: 60%; }
+            .bar:nth-child(2) { animation-delay: -0.2s; height: 30%; }
+            .bar:nth-child(3) { animation-delay: -0.5s; height: 80%; }
+            .bar:nth-child(4) { animation-delay: -0.1s; height: 40%; }
+            @keyframes equalize { 0% { height: 30%; } 50% { height: 100%; } 100% { height: 30%; } }
+
+            /* General Modal Styles */
+            #modal-description h1, #modal-description h2 { color: white; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 700; font-size: 1.5rem; }
+            #modal-description p { margin-bottom: 1em; line-height: 1.7; color: #d1d5db; }
+            #modal-description a { color: var(--spotify-green); text-decoration: underline; }
+            #modal-description ul { list-style: disc; margin-left: 1.5em; margin-bottom: 1em; }
+            
+            /* Glassmorphism for Mobile Nav */
+            .mobile-nav-glass {
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-top: 1px solid rgba(255,255,255,0.1);
+            }
+
+            /* --- MODERN RESUME STYLE (Two Column) --- */
+            #resume-paper-modern {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: white;
+                color: #333;
+                width: 210mm;
+                min-height: 296mm;
+                box-sizing: border-box;
+                margin: 20px auto;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                display: flex; /* Creates the columns */
+                overflow: hidden;
+                text-align: left;
+            }
+
+            /* Left Column (Darker/Sidebar) */
+            .resume-left-col {
+                width: 32%;
+                background-color: #f4f4f5;
+                padding: 30px 20px;
+                border-right: 1px solid #e4e4e7;
+                display: flex;
+                flex-direction: column;
+                gap: 25px;
+            }
+
+            /* Right Column (Main Content) */
+            .resume-right-col {
+                width: 68%;
+                padding: 40px 30px;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            /* Typography & Elements */
+            .mod-header h1 {
+                margin: 0;
+                font-size: 28pt;
+                line-height: 1.1;
+                color: #18181b;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+            .mod-header .mod-role {
+                font-size: 14pt;
+                color: #1DB954; /* Spotify Green Accent */
+                font-weight: 600;
+                margin-top: 5px;
+                margin-bottom: 20px;
+            }
+
+            .mod-section h2 {
+                font-size: 11pt;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: #52525b;
+                border-bottom: 2px solid #1DB954;
+                padding-bottom: 5px;
+                margin-bottom: 10px;
+                margin-top: 0;
+                font-weight: 700;
+            }
+
+            /* Contact Info */
+            .mod-contact-item {
+                font-size: 9pt;
+                margin-bottom: 8px;
+                word-break: break-all;
+            }
+            .mod-contact-item a { color: #333; text-decoration: none; }
+
+            /* Experience & Projects */
+            .mod-entry { margin-bottom: 15px; }
+            .mod-entry-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+            .mod-title { font-weight: 700; font-size: 11pt; color: #000; }
+            .mod-date { font-size: 9pt; color: #71717a; font-style: italic; }
+            .mod-company { font-size: 10pt; font-weight: 600; color: #3f3f46; margin-bottom: 4px; }
+            .mod-desc { font-size: 9.5pt; line-height: 1.5; color: #333; text-align: justify; }
+
+            /* Skills Tags */
+            .mod-skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+            .mod-skill-tag {
+                background: #fff;
+                border: 1px solid #d4d4d8;
+                padding: 4px 8px;
+                font-size: 8.5pt;
+                border-radius: 4px;
+                font-weight: 500;
+            }
+
+            /* Mobile responsiveness for the paper preview */
+            @media (max-width: 768px) {
+                #resume-paper-modern { width: 100%; min-height: auto; flex-direction: column; padding: 0; }
+                .resume-left-col, .resume-right-col { width: 100%; border-right: none; padding: 20px; }
+                .resume-left-col { background-color: #f4f4f5; }
+            }
+        </style>
+    </head>
+    <body class="antialiased text-sm selection:bg-[#1db954] selection:text-black">
         
-        @media (max-width: 768px) {
-            .play-button { opacity: 1; transform: translateY(0); width: 40px; height: 40px; bottom: 8px; right: 8px; }
-            .content-card:active { transform: scale(0.98); }
-        }
+        <div class="spotify-app-grid">
+            
+            <aside class="sidebar hidden md:flex flex-col gap-2">
+                <div class="bg-[#121212] rounded-lg p-4">
+                    <nav class="space-y-4">
+                        <a href="#" onclick="document.getElementById('main-content').scrollTo({top: 0, behavior: 'smooth'}); return false;" class="sidebar-link flex items-center gap-4 font-bold text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33zm-2-1.732a3 3 0 0 1 3 0l7.5 4.33a2 2 0 0 1 1 1.732V21a1 1 0 0 1-1 1h-6.5a1 1 0 0 1-1-1v-6h-3v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.577a2 2 0 0 1 1-1.732l7.5-4.33z"/></svg>Home
+                        </a>
+                        
+                        {% if projects %}
+                        <a href="#projects" class="sidebar-link flex items-center gap-4 font-bold text-gray-400 hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10.533 1.279a2.75 2.75 0 0 1 2.934 0l6.25 3.328a2.75 2.75 0 0 1 1.467 2.389v6.608a2.75 2.75 0 0 1-1.467 2.389l-6.25 3.328a2.75 2.75 0 0 1-2.934 0l-6.25-3.328a2.75 2.75 0 0 1-1.467-2.389V7.004a2.75 2.75 0 0 1 1.467-2.396l6.25-3.328zM12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5z"/></svg>Projects</a>
+                        {% endif %}
+                    </nav>
+                </div>
+                <div class="bg-[#121212] rounded-lg flex-grow flex flex-col overflow-hidden">
+                    <div class="p-4 shadow-md z-10"><h2 class="font-bold flex items-center gap-2 text-gray-400 hover:text-white transition-colors cursor-pointer"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zm6 0a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zm6 0a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1z"/></svg>Your Library</h2></div>
+                    <div class="flex-1 overflow-y-auto p-2 space-y-1 library-scroll-content">
+                        <a href="#about" class="library-item flex p-2 rounded-md gap-3">
+                            {% if about.profile_image %}<img src="{{ about.profile_image.url }}" class="w-12 h-12 rounded-md object-cover" alt="About" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');" /><div class="hidden w-12 h-12 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 items-center justify-center font-bold text-white">{{ about.name|slice:":2"|upper }}</div>{% else %}<div class="w-12 h-12 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white">{{ about.name|slice:":2"|upper }}</div>{% endif %}
+                            <div class="flex flex-col justify-center"><p class="font-semibold text-white truncate">About Me</p><p class="text-xs text-gray-400">Artist</p></div>
+                        </a>
+                        
+                        {% if jobs %}
+                        <a href="#experience" class="library-item flex p-2 rounded-md gap-3"><div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4zm2 4h12v2H6V6zm0 4h12v2H6v-2zm0 4h8v2H6v-2z"/></svg></div><div class="flex flex-col justify-center"><p class="font-semibold text-white truncate">Experience</p><p class="text-xs text-gray-400">Folder</p></div></a>
+                        {% endif %}
+                        
+                        {% if educations %}
+                        <a href="#education" class="library-item flex p-2 rounded-md gap-3"><div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg></div><div class="flex flex-col justify-center"><p class="font-semibold text-white truncate">Education</p><p class="text-xs text-gray-400">Folder</p></div></a>
+                        {% endif %}
+                        
+                        {% if recent_posts %}
+                        <a href="#blog" class="library-item flex p-2 rounded-md gap-3"><div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg></div><div class="flex flex-col justify-center"><p class="font-semibold text-white truncate">Thoughts</p><p class="text-xs text-gray-400">Blog</p></div></a>
+                        {% endif %}
 
-        /* Sidebar & Utilities */
-        .library-item { transition: background-color 0.2s ease, color 0.2s ease; }
-        .library-item:hover { background-color: #1A1A1A; color: #fff; }
-        .skill-tag { background-color: rgba(255,255,255,0.1); border: 1px solid transparent; transition: all 0.2s; }
-        .skill-tag:hover { background-color: rgba(255,255,255,0.2); border-color: #fff; color: #fff; }
+                        <a href="#contact" class="library-item flex p-2 rounded-md gap-3">
+                            <div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <p class="font-semibold text-white truncate">Contact</p>
+                                <p class="text-xs text-gray-400">Message</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </aside>
 
-        /* Equalizer Animation */
-        .equalizer { display: flex; gap: 2px; align-items: flex-end; height: 12px; width: 16px; }
-        .bar { width: 3px; background-color: var(--spotify-green); animation: equalize 1s infinite ease-in-out; }
-        .bar:nth-child(1) { animation-delay: -0.4s; height: 60%; }
-        .bar:nth-child(2) { animation-delay: -0.2s; height: 30%; }
-        .bar:nth-child(3) { animation-delay: -0.5s; height: 80%; }
-        .bar:nth-child(4) { animation-delay: -0.1s; height: 40%; }
-        @keyframes equalize { 0% { height: 30%; } 50% { height: 100%; } 100% { height: 30%; } }
+            <main id="main-content" class="main-content h-full">
+                {% if messages %}
+                <div id="toast-container" class="fixed top-20 right-4 z-[100] flex flex-col gap-2 transition-opacity duration-500 ease-out">
+                    {% for message in messages %}
+                    <div class="flex items-center p-4 mb-4 text-sm rounded-lg shadow-lg animate-bounce-in
+                        {% if message.tags == 'success' %}text-green-800 bg-green-100 dark:bg-[#1db954] dark:text-black{% else %}text-red-800 bg-red-100 dark:bg-red-200 dark:text-red-900{% endif %}" role="alert">
+                        <svg class="flex-shrink-0 inline w-4 h-4 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                        </svg>
+                        <div class="font-medium">{{ message }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
-        /* General Modal Styles */
-        #modal-description h1, #modal-description h2 { color: white; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 700; font-size: 1.5rem; }
-        #modal-description p { margin-bottom: 1em; line-height: 1.7; color: #d1d5db; }
-        #modal-description a { color: var(--spotify-green); text-decoration: underline; }
-        #modal-description ul { list-style: disc; margin-left: 1.5em; margin-bottom: 1em; }
-        
-        /* Glassmorphism for Mobile Nav */
-        .mobile-nav-glass {
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* --- MODERN RESUME STYLE (Two Column) --- */
-        #resume-paper-modern {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
-            color: #333;
-            width: 210mm;
-            min-height: 296mm;
-            box-sizing: border-box;
-            margin: 20px auto;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            display: flex; /* Creates the columns */
-            overflow: hidden;
-            text-align: left;
-        }
-
-        /* Left Column (Darker/Sidebar) */
-        .resume-left-col {
-            width: 32%;
-            background-color: #f4f4f5;
-            padding: 30px 20px;
-            border-right: 1px solid #e4e4e7;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        /* Right Column (Main Content) */
-        .resume-right-col {
-            width: 68%;
-            padding: 40px 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* Typography & Elements */
-        .mod-header h1 {
-            margin: 0;
-            font-size: 28pt;
-            line-height: 1.1;
-            color: #18181b;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .mod-header .mod-role {
-            font-size: 14pt;
-            color: #1DB954; /* Spotify Green Accent */
-            font-weight: 600;
-            margin-top: 5px;
-            margin-bottom: 20px;
-        }
-
-        .mod-section h2 {
-            font-size: 11pt;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #52525b;
-            border-bottom: 2px solid #1DB954;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            margin-top: 0;
-            font-weight: 700;
-        }
-
-        /* Contact Info */
-        .mod-contact-item {
-            font-size: 9pt;
-            margin-bottom: 8px;
-            word-break: break-all;
-        }
-        .mod-contact-item a { color: #333; text-decoration: none; }
-
-        /* Experience & Projects */
-        .mod-entry { margin-bottom: 15px; }
-        .mod-entry-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
-        .mod-title { font-weight: 700; font-size: 11pt; color: #000; }
-        .mod-date { font-size: 9pt; color: #71717a; font-style: italic; }
-        .mod-company { font-size: 10pt; font-weight: 600; color: #3f3f46; margin-bottom: 4px; }
-        .mod-desc { font-size: 9.5pt; line-height: 1.5; color: #333; text-align: justify; }
-
-        /* Skills Tags */
-        .mod-skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-        .mod-skill-tag {
-            background: #fff;
-            border: 1px solid #d4d4d8;
-            padding: 4px 8px;
-            font-size: 8.5pt;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-
-        /* Mobile responsiveness for the paper preview */
-        @media (max-width: 768px) {
-            #resume-paper-modern { width: 100%; min-height: auto; flex-direction: column; padding: 0; }
-            .resume-left-col, .resume-right-col { width: 100%; border-right: none; padding: 20px; }
-            .resume-left-col { background-color: #f4f4f5; }
-        }
-    </style>
-</head>
-<body class="antialiased text-sm selection:bg-[#1db954] selection:text-black">
-    
-    <div class="spotify-app-grid">
-        
-        <aside class="sidebar hidden md:flex flex-col gap-2">
-            <div class="bg-[#121212] rounded-lg p-4">
-                <nav class="space-y-4">
-                    <a href="#" onclick="document.getElementById('main-content').scrollTo({top: 0, behavior: 'smooth'}); return false;" class="sidebar-link flex items-center gap-4 font-bold text-gray-400 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33zm-2-1.732a3 3 0 0 1 3 0l7.5 4.33a2 2 0 0 1 1 1.732V21a1 1 0 0 1-1 1h-6.5a1 1 0 0 1-1-1v-6h-3v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.577a2 2 0 0 1 1-1.732l7.5-4.33z"/></svg>Home
-                    </a>
-                    
-                    {% if projects %}
-                    <a href="#projects" class="sidebar-link flex items-center gap-4 font-bold text-gray-400 hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10.533 1.279a2.75 2.75 0 0 1 2.934 0l6.25 3.328a2.75 2.75 0 0 1 1.467 2.389v6.608a2.75 2.75 0 0 1-1.467 2.389l-6.25 3.328a2.75 2.75 0 0 1-2.934 0l-6.25-3.328a2.75 2.75 0 0 1-1.467-2.389V7.004a2.75 2.75 0 0 1 1.467-2.396l6.25-3.328zM12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5z"/></svg>Projects</a>
-                    {% endif %}
-                </nav>
-            </div>
-            <div class="bg-[#121212] rounded-lg flex-grow flex flex-col overflow-hidden">
-                <div class="p-4 shadow-md z-10"><h2 class="font-bold flex items-center gap-2 text-gray-400 hover:text-white transition-colors cursor-pointer"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zm6 0a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zm6 0a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1z"/></svg>Your Library</h2></div>
-                <div class="flex-1 overflow-y-auto p-2 space-y-1 library-scroll-content">
-                    <a href="#about" class="library-item flex p-2 rounded-md gap-3">
-                        {% if about.profile_image %}<img src="{{ about.profile_image.url }}" class="w-12 h-12 rounded-md object-cover" alt="About" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');" /><div class="hidden w-12 h-12 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 items-center justify-center font-bold text-white">{{ about.name|slice:":2"|upper }}</div>{% else %}<div class="w-12 h-12 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white">{{ about.name|slice:":2"|upper }}</div>{% endif %}
-                        <div class="flex flex-col justify-center"><p class="font-semibold text-white truncate">About Me</p><p class="text-xs text-gray-400">Artist</p></div>
-                    </a>
-                    
-                    {% if jobs %}
-                    <a href="#experience" class="library-item flex p-2 rounded-md gap-3"><div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4zm2 4h12v2H6V6zm0 4h12v2H6v-2zm0 4h8v2H6v-2z"/></svg></div><div class="flex flex-col justify-center"><p class="font-semibold text-white truncate">Experience</p><p class="text-xs text-gray-400">Folder</p></div></a>
-                    {% endif %}
-                    
-                    {% if educations %}
-                    <a href="#education" class="library-item flex p-2 rounded-md gap-3"><div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg></div><div class="flex flex-col justify-center"><p class="font-semibold text-white truncate">Education</p><p class="text-xs text-gray-400">Folder</p></div></a>
-                    {% endif %}
-                    
-                    {% if recent_posts %}
-                    <a href="#blog" class="library-item flex p-2 rounded-md gap-3"><div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg></div><div class="flex flex-col justify-center"><p class="font-semibold text-white truncate">Thoughts</p><p class="text-xs text-gray-400">Blog</p></div></a>
-                    {% endif %}
-
-                    <a href="#contact" class="library-item flex p-2 rounded-md gap-3">
-                        <div class="w-12 h-12 rounded-md bg-[#282828] flex items-center justify-center text-gray-400">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                <header id="main-header" class="sticky top-0 z-50 px-4 md:px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <button id="history-back" class="w-8 h-8 bg-black/70 rounded-full flex items-center justify-center text-white hover:bg-black/90 transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg></button>
+                        <button id="history-forward" class="w-8 h-8 bg-black/70 rounded-full flex items-center justify-center text-white hover:bg-black/90 transition opacity-50 cursor-not-allowed hidden md:flex"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg></button>
+                    </div>
+                    {% if about %}
+                    <div class="relative group">
+                        <button class="flex items-center gap-2 bg-black/70 rounded-full p-1 pr-3 hover:bg-[#282828] transition">
+                            {% if about.profile_image %}
+                                <img src="{{ about.profile_image.url }}" class="w-7 h-7 rounded-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');"/>
+                                <div class="hidden w-7 h-7 rounded-full bg-green-500 items-center justify-center text-black font-bold text-xs">{{ about.name|first|upper }}</div>
+                            {% else %}
+                                <div class="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-black font-bold text-xs">{{ about.name|first|upper }}</div>
+                            {% endif %}
+                            <span class="text-white font-bold text-sm hidden sm:block">{{ about.name }}</span>
+                        </button>
+                        
+                        <div class="absolute right-0 top-full pt-2 w-48 z-50 hidden group-hover:block hover:block">
+                            <div class="bg-[#282828] rounded shadow-xl p-1 border border-[#333]">
+                                <a href="#contact" class="block px-3 py-2 text-sm text-gray-200 hover:bg-[#3E3E3E] rounded">Contact</a>
+                                <a href="{{ socials.github }}" target="_blank" class="block px-3 py-2 text-sm text-gray-200 hover:bg-[#3E3E3E] rounded">GitHub Profile</a>
+                            </div>
                         </div>
-                        <div class="flex flex-col justify-center">
-                            <p class="font-semibold text-white truncate">Contact</p>
-                            <p class="text-xs text-gray-400">Message</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </aside>
+                    </div>
+                    {% endif %}
+                </header>
 
-        <main id="main-content" class="main-content h-full">
-            {% if messages %}
-            <div id="toast-container" class="fixed top-20 right-4 z-[100] flex flex-col gap-2 transition-opacity duration-500 ease-out">
-                {% for message in messages %}
-                <div class="flex items-center p-4 mb-4 text-sm rounded-lg shadow-lg animate-bounce-in
-                    {% if message.tags == 'success' %}text-green-800 bg-green-100 dark:bg-[#1db954] dark:text-black{% else %}text-red-800 bg-red-100 dark:bg-red-200 dark:text-red-900{% endif %}" role="alert">
-                    <svg class="flex-shrink-0 inline w-4 h-4 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                    </svg>
-                    <div class="font-medium">{{ message }}</div>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <header id="main-header" class="sticky top-0 z-50 px-4 md:px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <button id="history-back" class="w-8 h-8 bg-black/70 rounded-full flex items-center justify-center text-white hover:bg-black/90 transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg></button>
-                    <button id="history-forward" class="w-8 h-8 bg-black/70 rounded-full flex items-center justify-center text-white hover:bg-black/90 transition opacity-50 cursor-not-allowed hidden md:flex"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg></button>
-                </div>
                 {% if about %}
-                <div class="relative group">
-                    <button class="flex items-center gap-2 bg-black/70 rounded-full p-1 pr-3 hover:bg-[#282828] transition">
-                        {% if about.profile_image %}
-                            <img src="{{ about.profile_image.url }}" class="w-7 h-7 rounded-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');"/>
-                            <div class="hidden w-7 h-7 rounded-full bg-green-500 items-center justify-center text-black font-bold text-xs">{{ about.name|first|upper }}</div>
-                        {% else %}
-                            <div class="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-black font-bold text-xs">{{ about.name|first|upper }}</div>
-                        {% endif %}
-                        <span class="text-white font-bold text-sm hidden sm:block">{{ about.name }}</span>
-                    </button>
-                    
-                    <div class="absolute right-0 top-full pt-2 w-48 z-50 hidden group-hover:block hover:block">
-                        <div class="bg-[#282828] rounded shadow-xl p-1 border border-[#333]">
-                            <a href="#contact" class="block px-3 py-2 text-sm text-gray-200 hover:bg-[#3E3E3E] rounded">Contact</a>
-                            <a href="{{ socials.github }}" target="_blank" class="block px-3 py-2 text-sm text-gray-200 hover:bg-[#3E3E3E] rounded">GitHub Profile</a>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </header>
-
-            {% if about %}
-            <div id="header-gradient" class="px-4 md:px-6 pb-6 pt-10 -mt-16 flex items-end min-h-[340px]">
-                <div class="flex flex-col md:flex-row gap-6 items-center md:items-end w-full text-center md:text-left">
-                    <div class="flex-shrink-0 shadow-[0_4px_60px_rgba(0,0,0,0.5)]">
-                        {% if about.profile_image %}
-                            <img src="{{ about.profile_image.url }}" class="w-32 h-32 md:w-52 md:h-52 rounded-full md:rounded shadow-2xl object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');" />
-                            <div class="hidden w-32 h-32 md:w-52 md:h-52 bg-gradient-to-br from-blue-600 to-green-400 rounded-full md:rounded shadow-2xl items-center justify-center"><span class="text-6xl font-bold text-white opacity-50">{{ about.name|slice:":2"|upper }}</span></div>
-                        {% else %}
-                            <div class="w-32 h-32 md:w-52 md:h-52 bg-gradient-to-br from-blue-600 to-green-400 rounded-full md:rounded shadow-2xl flex items-center justify-center"><span class="text-6xl font-bold text-white opacity-50">{{ about.name|slice:":2"|upper }}</span></div>
-                        {% endif %}
-                    </div>
-                    <div class="flex flex-col gap-2 mb-2 w-full md:w-auto">
-                        <div class="verified-badge flex items-center justify-center md:justify-start gap-1"><svg class="w-5 h-5 text-[#3d91f4] fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.3-6.3 1.5 1.5-7.8 7.8z"></path></svg><span>Verified Artist</span></div>
-                        <h1 class="text-3xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white">{{ about.name }}</h1>
-                        <div class="flex items-center justify-center md:justify-start gap-2 text-sm md:text-base text-gray-200 mt-2"><span>{{ about.title }}</span><span class="w-1 h-1 bg-white rounded-full"></span><span>{{ projects|length }} Projects</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-4 md:px-6 py-6 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-[#121212]">
-                <div class="flex items-center gap-6 justify-center md:justify-start">
-                    {% if projects %}
-                    <button onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})" class="w-14 h-14 bg-[#1db954] rounded-full flex items-center justify-center hover:scale-105 hover:bg-[#1ed760] transition shadow-lg text-black">
-                        <svg class="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
-                    </button>
-                    {% endif %}
-                    
-                    <button onclick="openResumeModal()" class="border border-gray-500 text-white font-bold text-xs tracking-widest uppercase px-4 py-2 rounded hover:border-white hover:scale-105 transition">
-                        Resume
-                    </button>
-                </div>
-            </div>
-
-            <div class="px-4 md:px-6 py-4 space-y-12">
-                {% if projects %}
-                <section id="projects">
-                    <h2 class="text-xl md:text-2xl font-bold text-white mb-4 hover:underline cursor-pointer">Projects</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-                        {% for project in projects %}
-                        <div class="content-card p-3 md:p-4 rounded-md group relative" data-title="{{ project.title }}" data-short-desc="{{ project.short_description }}" data-image="{% if project.image %}{{ project.image.url }}{% endif %}" data-description="{{ project.long_description }}" data-link="{{ project.link|default:'#' }}">
-                            <div class="relative mb-3 md:mb-4 shadow-lg rounded-md overflow-hidden">
-                                {% if project.image %}
-                                    <img src="{{ project.image.url }}" class="w-full aspect-square object-cover" alt="{{ project.title }}">
-                                {% else %}
-                                    <div class="w-full aspect-square bg-[#333] flex items-center justify-center text-gray-500 font-bold text-2xl md:text-3xl project-initials-placeholder select-none" data-title="{{ project.title }}">{{ project.title|slice:":2"|upper }}</div>
-                                {% endif %}
-                                <div class="play-button absolute bottom-2 right-2 w-10 h-10 md:w-12 md:h-12 bg-[#1db954] rounded-full flex items-center justify-center text-black"><svg class="w-5 h-5 md:w-6 md:h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg></div>
-                            </div>
-                            <h3 class="text-white font-bold truncate mb-1 text-sm md:text-base">{{ project.title }}</h3>
-                            <p class="text-xs md:text-sm text-gray-400 line-clamp-2">{{ project.short_description }}</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </section>
-                {% endif %}
-
-                <section id="about">
-                    <h2 class="text-xl md:text-2xl font-bold text-white mb-4">About & Skills</h2>
-                    <div class="flex flex-col lg:flex-row gap-8">
-                        <div class="lg:w-2/3">
-                            <p class="text-gray-300 leading-relaxed whitespace-pre-line text-sm md:text-base">{{ about.description|linebreaksbr }}</p>
-                            <div class="mt-6"><h3 class="text-white font-bold mb-3">Tech Stack</h3><div class="flex flex-wrap gap-2">{% for skill in about.skills.all %}<span class="skill-tag px-3 py-1 rounded-full text-xs md:text-sm text-gray-200 cursor-default">{{ skill.name }}</span>{% endfor %}</div></div>
-                        </div>
-                    </div>
-                </section>
-
-                {% if jobs %}
-                <section id="experience">
-                    <h2 class="text-xl md:text-2xl font-bold text-white mb-4">Experience</h2>
-                    <div class="space-y-4">
-                        {% for job in jobs %}
-                        <div class="bg-[#181818] hover:bg-[#282828] transition-colors rounded-lg p-4 md:p-6 group cursor-default">
-                            <div class="flex items-start gap-4">
-                                <div class="flex-shrink-0 text-[#1db954] w-6 mt-1 hidden sm:block"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg></div>
-                                <div class="flex-grow">
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2"><h3 class="text-base md:text-lg font-bold text-white group-hover:text-[#1db954] transition">{{ job.role }}</h3><span class="text-xs md:text-sm text-gray-400 font-mono">{{ job.start_date }} - {{ job.end_date|default:'Present' }}</span></div>
-                                    <h4 class="text-sm md:text-md text-gray-300 font-semibold mb-3">{{ job.company }}</h4><p class="text-sm text-gray-400 leading-relaxed">{{ job.description|linebreaksbr }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </section>
-                {% endif %}
-
-                {% if educations %}
-                <section id="education">
-                    <h2 class="text-xl md:text-2xl font-bold text-white mb-4">Education</h2>
-                    <div class="space-y-4">
-                        {% for edu in educations %}
-                        <div class="bg-[#181818] hover:bg-[#282828] transition-colors rounded-lg p-4 md:p-6 group cursor-default">
-                            <div class="flex items-start gap-4">
-                                <div class="flex-shrink-0 text-[#1db954] w-6 mt-1 hidden sm:block"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg></div>
-                                <div class="flex-grow">
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2"><h3 class="text-base md:text-lg font-bold text-white group-hover:text-[#1db954] transition">{{ edu.institution }}</h3><span class="text-xs md:text-sm text-gray-400 font-mono">{{ edu.start_year }} - {{ edu.end_year }}</span></div>
-                                    <h4 class="text-sm md:text-md text-gray-300 font-semibold mb-3">{{ edu.degree }}</h4><p class="text-sm text-gray-400 leading-relaxed">{{ edu.description|linebreaksbr }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </section>
-                {% endif %}
-
-                {% if recent_posts %}
-                <section id="blog">
-                    <h2 class="text-xl md:text-2xl font-bold text-white mb-4">Thoughts</h2>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        {% for post in recent_posts %}
-                        <div class="blog-card content-card flex gap-4 p-4 rounded-md group items-center" data-title="{{ post.title }}" data-description="{{ post.content|safe }}">
-                             <div class="min-w-[64px] h-16 bg-[#333] rounded flex items-center justify-center text-gray-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 12h6m-1-4h.01"></path></svg></div>
-                             <div class="overflow-hidden"><h3 class="text-white font-bold truncate group-hover:text-[#1db954] transition text-sm md:text-base">{{ post.title }}</h3><p class="text-xs text-gray-400 mt-1">{{ post.published_at|date:"M d, Y" }}</p><p class="text-xs text-gray-500 mt-1 line-clamp-1">{{ post.excerpt|default:"Click to read more..." }}</p></div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </section>
-                {% endif %}
-
-                <section id="contact">
-                    <h2 class="text-xl md:text-2xl font-bold text-white mb-4">Get in Touch</h2>
-                    <div class="bg-gradient-to-br from-[#181818] to-[#121212] rounded-lg p-6 md:p-8 border border-[#282828] shadow-lg">
-                        <div class="grid md:grid-cols-2 gap-8 md:gap-12">
-                            <div class="flex flex-col justify-between">
-                                <div>
-                                    <h3 class="text-2xl font-bold text-white mb-2">Let's Connect</h3>
-                                    <p class="text-gray-400 mb-6">Have a project in mind or just want to say hi? Fill out the form and I'll send you a confirmation email instantly.</p>
-                                    
-                                    <div class="space-y-4">
-                                        {% if socials.email_link %}
-                                        <div class="flex items-center gap-3 text-gray-300 hover:text-white transition">
-                                            <div class="w-10 h-10 rounded-full bg-[#282828] flex items-center justify-center text-[#1db954]">
-                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                                            </div>
-                                            <span>{{ socials.email_link }}</span>
-                                        </div>
-                                        {% endif %}
-                                        
-                                        {% if socials.linkedin %}
-                                        <a href="{{ socials.linkedin }}" target="_blank" class="flex items-center gap-3 text-gray-300 hover:text-white transition">
-                                            <div class="w-10 h-10 rounded-full bg-[#282828] flex items-center justify-center text-[#1db954]">
-                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                                            </div>
-                                            <span>LinkedIn Profile</span>
-                                        </a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <form method="POST" action="{% url 'home' %}" class="space-y-4">
-                                {% csrf_token %}
-                                
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="space-y-1">
-                                        <label for="name" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Name</label>
-                                        <input type="text" name="name" id="name" required placeholder="Your Name" 
-                                            class="w-full bg-[#3e3e3e] text-white border-0 rounded p-3 focus:ring-2 focus:ring-[#1db954] placeholder-gray-500 transition-all hover:bg-[#484848]">
-                                    </div>
-                                    <div class="space-y-1">
-                                        <label for="email" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Email</label>
-                                        <input type="email" name="email" id="email" required placeholder="name@example.com" 
-                                            class="w-full bg-[#3e3e3e] text-white border-0 rounded p-3 focus:ring-2 focus:ring-[#1db954] placeholder-gray-500 transition-all hover:bg-[#484848]">
-                                    </div>
-                                </div>
-                                
-                                <div class="space-y-1">
-                                    <label for="subject" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Subject</label>
-                                    <input type="text" name="subject" id="subject" placeholder="Project Inquiry" 
-                                        class="w-full bg-[#3e3e3e] text-white border-0 rounded p-3 focus:ring-2 focus:ring-[#1db954] placeholder-gray-500 transition-all hover:bg-[#484848]">
-                                </div>
-
-                                <div class="space-y-1">
-                                    <label for="message" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Message</label>
-                                    <textarea name="message" id="message" rows="4" required placeholder="Tell me about your project..." 
-                                        class="w-full bg-[#3e3e3e] text-white border-0 rounded p-3 focus:ring-2 focus:ring-[#1db954] placeholder-gray-500 transition-all hover:bg-[#484848] resize-none"></textarea>
-                                </div>
-
-                                <button type="submit" class="w-full md:w-auto bg-[#1db954] text-black font-bold uppercase tracking-widest text-xs py-4 px-8 rounded-full hover:scale-105 hover:bg-[#1ed760] transition-all duration-200 shadow-lg">
-                                    Send Message
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </section>
-
-                <footer class="mt-12 pb-44 md:pb-12 text-gray-400 text-sm">
-                    <div class="border-t border-[#282828] pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div class="flex gap-8">
-                             {% if socials.linkedin %}
-                             <a href="{{ socials.linkedin }}" target="_blank" class="w-10 h-10 rounded-full bg-[#282828] hover:bg-[#1db954] hover:text-white flex items-center justify-center transition-all duration-300 group">
-                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                             </a>
-                             {% endif %}
-                             {% if socials.github %}
-                             <a href="{{ socials.github }}" target="_blank" class="w-10 h-10 rounded-full bg-[#282828] hover:bg-[#1db954] hover:text-white flex items-center justify-center transition-all duration-300 group">
-                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                             </a>
-                             {% endif %}
-                             {% if socials.email %}
-                             <a href="{{ socials.email }}" class="w-10 h-10 rounded-full bg-[#282828] hover:bg-[#1db954] hover:text-white flex items-center justify-center transition-all duration-300 group">
-                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                             </a>
-                             {% endif %}
-                        </div>
-                        <div class="text-right flex flex-col items-center md:items-end">
-                            <p class="text-xs text-gray-500">&copy; {% now "Y" %} {{ about.name }}</p>
-                            <p class="text-[10px] text-gray-600 mt-1">Portfolio v2.0</p>
-                        </div>
-                    </div>
-                </footer>
-            </div>
-            {% endif %}
-        </main>
-
-        <footer class="now-playing-bar bg-[#181818] border-t border-[#282828] px-3 py-2 md:px-4 md:py-3 flex items-center justify-between z-40 fixed bottom-[65px] left-0 w-full md:static md:w-auto">
-            <div class="flex items-center gap-2 md:gap-4 w-[40%] md:w-[30%]">
-                <div id="now-playing-img-wrapper" class="w-10 h-10 md:w-14 md:h-14 bg-[#282828] rounded shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0">
-                    <img src="https://placehold.co/60x60/222/1DB954?text=♫" class="w-full h-full object-cover" id="song-img">
-                </div>
-                <div class="overflow-hidden">
-                    <h4 id="song-title" class="text-xs md:text-sm text-white font-semibold hover:underline cursor-pointer truncate">Midnight Coding</h4>
-                    <p id="song-artist" class="text-[10px] md:text-xs text-gray-400 hover:underline cursor-pointer truncate">Lofi Vibes</p>
-                </div>
-                <button class="text-[#1db954] hover:text-[#1ed760] hidden lg:block"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
-            </div>
-
-            <div class="flex flex-col items-center w-[55%] md:w-[40%] max-w-2xl">
-                <div class="flex items-center gap-4 md:gap-6 mb-1">
-                    <button class="text-gray-400 hover:text-white hidden md:block"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M3.3 1a.7.7 0 0 1 .7.7v12.6a.7.7 0 0 1-1.4 0V1.7a.7.7 0 0 1 .7-.7zm9.896 1.696a.7.7 0 0 1 1.007.884L9.12 8l5.083 4.42a.7.7 0 0 1-1.007.884l-5.9-5.13a.7.7 0 0 1 0-1.148l5.9-5.13z"/></svg></button>
-                    
-                    <button id="master-play-btn" class="w-8 h-8 md:w-8 md:h-8 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition">
-                        <svg id="icon-play" class="w-4 h-4 md:w-5 md:h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        <svg id="icon-pause" class="w-4 h-4 md:w-5 md:h-5 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                    </button>
-                    
-                    <button class="text-gray-400 hover:text-white hidden md:block"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M12.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 1.4 0V1.7a.7.7 0 0 0-.7-.7zm-9.896 1.696a.7.7 0 0 0-1.007.884L6.88 8l-5.083 4.42a.7.7 0 0 0 1.007.884l5.9-5.13a.7.7 0 0 0 0-1.148l-5.9-5.13z"/></svg></button>
-                </div>
-                
-                <div class="flex items-center gap-2 w-full text-[10px] md:text-xs text-gray-400 font-mono select-none">
-                    <span id="current-time" class="min-w-[25px] md:min-w-[30px] text-right">0:00</span>
-                    <div id="progress-container" class="h-1 bg-[#535353] rounded-full w-full group cursor-pointer progress-bar-container relative">
-                        <div class="progress-bar-inner h-full bg-white rounded-full w-[0%] relative">
-                            <div class="w-3 h-3 bg-white rounded-full absolute -right-1.5 -top-1 shadow opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        </div>
-                    </div>
-                    <span id="total-time" class="min-w-[25px] md:min-w-[30px]">0:00</span>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-3 w-[10%] md:w-[30%]">
-                <div id="equalizer" class="equalizer opacity-0 transition-opacity hidden md:flex">
-                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                </div>
-                <div class="w-24 h-1 bg-[#535353] rounded-full hidden md:block cursor-pointer group">
-                    <div class="h-full bg-white group-hover:bg-[#1db954] w-[70%] rounded-full"></div>
-                </div>
-            </div>
-        </footer>
-
-        <nav class="md:hidden fixed bottom-0 w-full mobile-nav-glass h-[65px] flex justify-evenly items-center z-50 pb-1">
-            <a href="#" onclick="document.getElementById('main-content').scrollTo({top: 0, behavior: 'smooth'}); return false;" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
-                <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33z"/>
-                </svg>
-                <span class="text-[9px] font-medium">Home</span>
-            </a>
-
-            {% if projects %}
-            <a href="#projects" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
-                <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
-                     <path d="M10.5 3a7.5 7.5 0 015.645 12.438l4.709 4.708a1 1 0 01-1.414 1.415l-4.708-4.709A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/>
-                </svg>
-                <span class="text-[9px] font-medium">Projects</span>
-            </a>
-            {% endif %}
-
-            <a href="#about" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
-                <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-                <span class="text-[9px] font-medium">About</span>
-            </a>
-
-            {% if recent_posts %}
-            <a href="#blog" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
-                <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2zm-7 14H6v-2h6v2zm5-4H6v-2h11v2zm0-4H6V6h11v2z"/>
-                </svg>
-                <span class="text-[9px] font-medium">Blog</span>
-            </a>
-            {% endif %}
-            
-            <a href="#contact" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
-                <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                </svg>
-                <span class="text-[9px] font-medium">Contact</span>
-            </a>
-        </nav>
-        
-    </div>
-
-    <div id="project-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-[#282828] w-full max-w-3xl max-h-[90vh] rounded-lg shadow-2xl overflow-hidden flex flex-col relative animate-fade-in-up">
-            <button id="close-modal" class="absolute top-4 right-4 z-20 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-            <div class="flex-1 overflow-y-auto">
-                <div id="modal-header" class="h-64 w-full bg-gray-700 relative">
-                    <img id="modal-img" src="" class="w-full h-full object-cover opacity-60">
-                    <div class="absolute bottom-0 left-0 p-6 md:p-8 bg-gradient-to-t from-[#282828] to-transparent w-full"><h2 id="modal-title" class="text-2xl md:text-4xl font-black text-white shadow-black drop-shadow-md"></h2></div>
-                </div>
-                <div class="p-6 md:p-8">
-                    <div id="modal-description" class="prose prose-invert max-w-none text-sm md:text-base"></div>
-                    <div class="mt-8 pt-6 border-t border-gray-700 flex justify-end"><a id="modal-link" href="#" target="_blank" class="bg-[#1db954] hover:bg-[#1ed760] text-black font-bold py-3 px-8 rounded-full transform hover:scale-105 transition shadow-lg">View Project</a></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="resume-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-0 md:p-4 backdrop-blur-md">
-        <div class="w-full max-w-4xl flex justify-between items-center p-4 text-white z-20">
-            <h2 class="font-bold text-xl">Resume</h2>
-            <div class="flex gap-4">
-                <button onclick="generatePDF()" class="bg-[#1db954] hover:bg-[#1ed760] text-black font-bold py-2 px-6 rounded-full transition flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    <span id="pdf-btn-text">Download PDF</span>
-                </button>
-                <button onclick="closeResumeModal()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-        </div>
-
-        <div class="flex-1 w-full overflow-y-auto pb-20 md:pb-4" id="resume-scroll-container">
-            
-            <div id="resume-paper-modern">
-                
-                <aside class="resume-left-col">
-                    
-                    <div class="mod-section">
-                        <h2>Contact</h2>
-                        {% if socials.email_link %}
-                        <div class="mod-contact-item">
-                            <strong>Email:</strong><br>
-                            <a href="mailto:{{ socials.email_link }}">{{ socials.email_link }}</a>
-                        </div>
-                        {% endif %}
-                        {% if socials.linkedin %}
-                        <div class="mod-contact-item">
-                            <strong>LinkedIn:</strong><br>
-                            <a href="{{ socials.linkedin }}">View Profile</a>
-                        </div>
-                        {% endif %}
-                        {% if socials.github %}
-                        <div class="mod-contact-item">
-                            <strong>GitHub:</strong><br>
-                            <a href="{{ socials.github }}">View Profile</a>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    {% if educations %}
-                    <div class="mod-section">
-                        <h2>Education</h2>
-                        {% for edu in educations %}
-                        <div class="mod-entry">
-                            <div class="mod-title">{{ edu.institution }}</div>
-                            <div class="mod-company">{{ edu.degree }}</div>
-                            <div class="mod-date">{{ edu.start_year }} – {{ edu.end_year }}</div>
-                            {% if edu.description %}
-                            <div class="mod-desc" style="margin-top: 4px;">{{ edu.description|linebreaksbr }}</div>
+                <div id="header-gradient" class="px-4 md:px-6 pb-6 pt-10 -mt-16 flex items-end min-h-[340px]">
+                    <div class="flex flex-col md:flex-row gap-6 items-center md:items-end w-full text-center md:text-left">
+                        <div class="flex-shrink-0 shadow-[0_4px_60px_rgba(0,0,0,0.5)]">
+                            {% if about.profile_image %}
+                                <img src="{{ about.profile_image.url }}" class="w-32 h-32 md:w-52 md:h-52 rounded-full md:rounded shadow-2xl object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');" />
+                                <div class="hidden w-32 h-32 md:w-52 md:h-52 bg-gradient-to-br from-blue-600 to-green-400 rounded-full md:rounded shadow-2xl items-center justify-center"><span class="text-6xl font-bold text-white opacity-50">{{ about.name|slice:":2"|upper }}</span></div>
+                            {% else %}
+                                <div class="w-32 h-32 md:w-52 md:h-52 bg-gradient-to-br from-blue-600 to-green-400 rounded-full md:rounded shadow-2xl flex items-center justify-center"><span class="text-6xl font-bold text-white opacity-50">{{ about.name|slice:":2"|upper }}</span></div>
                             {% endif %}
                         </div>
-                        {% endfor %}
+                        <div class="flex flex-col gap-2 mb-2 w-full md:w-auto">
+                            <div class="verified-badge flex items-center justify-center md:justify-start gap-1"><svg class="w-5 h-5 text-[#3d91f4] fill-current" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.3-6.3 1.5 1.5-7.8 7.8z"></path></svg><span>Verified Artist</span></div>
+                            <h1 class="text-3xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white">{{ about.name }}</h1>
+                            <div class="flex items-center justify-center md:justify-start gap-2 text-sm md:text-base text-gray-200 mt-2"><span>{{ about.title }}</span><span class="w-1 h-1 bg-white rounded-full"></span><span>{{ projects|length }} Projects</span></div>
+                        </div>
                     </div>
-                    {% endif %}
+                </div>
 
-                    {% if about.skills.all %}
-                    <div class="mod-section">
-                        <h2>Skills</h2>
-                        <div class="mod-skills-grid">
-                            {% for skill in about.skills.all %}
-                                <span class="mod-skill-tag">{{ skill.name }}</span>
+                <div class="px-4 md:px-6 py-6 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-[#121212]">
+                    <div class="flex items-center gap-6 justify-center md:justify-start">
+                        {% if projects %}
+                        <button onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})" class="w-14 h-14 bg-[#1db954] rounded-full flex items-center justify-center hover:scale-105 hover:bg-[#1ed760] transition shadow-lg text-black">
+                            <svg class="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg>
+                        </button>
+                        {% endif %}
+                        
+                        <button onclick="openResumeModal()" class="border border-gray-500 text-white font-bold text-xs tracking-widest uppercase px-4 py-2 rounded hover:border-white hover:scale-105 transition">
+                            Resume
+                        </button>
+                    </div>
+                </div>
+
+                <div class="px-4 md:px-6 py-4 space-y-12">
+                    {% if projects %}
+                    <section id="projects">
+                        <h2 class="text-xl md:text-2xl font-bold text-white mb-4 hover:underline cursor-pointer">Projects</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                            {% for project in projects %}
+                            <div class="content-card p-3 md:p-4 rounded-md group relative" data-title="{{ project.title }}" data-short-desc="{{ project.short_description }}" data-image="{% if project.image %}{{ project.image.url }}{% endif %}" data-description="{{ project.long_description }}" data-link="{{ project.link|default:'#' }}">
+                                <div class="relative mb-3 md:mb-4 shadow-lg rounded-md overflow-hidden">
+                                    {% if project.image %}
+                                        <img src="{{ project.image.url }}" class="w-full aspect-square object-cover" alt="{{ project.title }}">
+                                    {% else %}
+                                        <div class="w-full aspect-square bg-[#333] flex items-center justify-center text-gray-500 font-bold text-2xl md:text-3xl project-initials-placeholder select-none" data-title="{{ project.title }}">{{ project.title|slice:":2"|upper }}</div>
+                                    {% endif %}
+                                    <div class="play-button absolute bottom-2 right-2 w-10 h-10 md:w-12 md:h-12 bg-[#1db954] rounded-full flex items-center justify-center text-black"><svg class="w-5 h-5 md:w-6 md:h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"></path></svg></div>
+                                </div>
+                                <h3 class="text-white font-bold truncate mb-1 text-sm md:text-base">{{ project.title }}</h3>
+                                <p class="text-xs md:text-sm text-gray-400 line-clamp-2">{{ project.short_description }}</p>
+                            </div>
                             {% endfor %}
                         </div>
-                    </div>
+                    </section>
                     {% endif %}
-                </aside>
 
-                <main class="resume-right-col">
-                    
-                    <div class="mod-header">
-                        <h1>{{ about.name }}</h1>
-                        <div class="mod-role">{{ about.title }}</div>
-                    </div>
-
-                    {% if about.description %}
-                    <div class="mod-section">
-                        <h2>About Me</h2>
-                        <div class="mod-desc">{{ about.description }}</div>
-                    </div>
-                    {% endif %}
+                    <section id="about">
+                        <h2 class="text-xl md:text-2xl font-bold text-white mb-4">About & Skills</h2>
+                        <div class="flex flex-col lg:flex-row gap-8">
+                            <div class="lg:w-2/3">
+                                <p class="text-gray-300 leading-relaxed whitespace-pre-line text-sm md:text-base">{{ about.description|linebreaksbr }}</p>
+                                <div class="mt-6"><h3 class="text-white font-bold mb-3">Tech Stack</h3><div class="flex flex-wrap gap-2">{% for skill in about.skills.all %}<span class="skill-tag px-3 py-1 rounded-full text-xs md:text-sm text-gray-200 cursor-default">{{ skill.name }}</span>{% endfor %}</div></div>
+                            </div>
+                        </div>
+                    </section>
 
                     {% if jobs %}
-                    <div class="mod-section">
-                        <h2>Experience</h2>
-                        {% for job in jobs %}
-                        <div class="mod-entry">
-                            <div class="mod-entry-header">
-                                <span class="mod-title">{{ job.role }}</span>
-                                <span class="mod-date">{{ job.start_date }} – {{ job.end_date|default:"Present" }}</span>
+                    <section id="experience">
+                        <h2 class="text-xl md:text-2xl font-bold text-white mb-4">Experience</h2>
+                        <div class="space-y-4">
+                            {% for job in jobs %}
+                            <div class="bg-[#181818] hover:bg-[#282828] transition-colors rounded-lg p-4 md:p-6 group cursor-default">
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-shrink-0 text-[#1db954] w-6 mt-1 hidden sm:block"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg></div>
+                                    <div class="flex-grow">
+                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2"><h3 class="text-base md:text-lg font-bold text-white group-hover:text-[#1db954] transition">{{ job.role }}</h3><span class="text-xs md:text-sm text-gray-400 font-mono">{{ job.start_date }} - {{ job.end_date|default:'Present' }}</span></div>
+                                        <h4 class="text-sm md:text-md text-gray-300 font-semibold mb-3">{{ job.company }}</h4><p class="text-sm text-gray-400 leading-relaxed">{{ job.description|linebreaksbr }}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mod-company">{{ job.company }} {% if job.location %}| {{ job.location }}{% endif %}</div>
-                            <div class="mod-desc">{{ job.description|linebreaksbr }}</div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
-                    </div>
+                    </section>
                     {% endif %}
+
+                    {% if educations %}
+                    <section id="education">
+                        <h2 class="text-xl md:text-2xl font-bold text-white mb-4">Education</h2>
+                        <div class="space-y-4">
+                            {% for edu in educations %}
+                            <div class="bg-[#181818] hover:bg-[#282828] transition-colors rounded-lg p-4 md:p-6 group cursor-default">
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-shrink-0 text-[#1db954] w-6 mt-1 hidden sm:block"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg></div>
+                                    <div class="flex-grow">
+                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2"><h3 class="text-base md:text-lg font-bold text-white group-hover:text-[#1db954] transition">{{ edu.institution }}</h3><span class="text-xs md:text-sm text-gray-400 font-mono">{{ edu.start_year }} - {{ edu.end_year }}</span></div>
+                                        <h4 class="text-sm md:text-md text-gray-300 font-semibold mb-3">{{ edu.degree }}</h4><p class="text-sm text-gray-400 leading-relaxed">{{ edu.description|linebreaksbr }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    {% if recent_posts %}
+                    <section id="blog">
+                        <h2 class="text-xl md:text-2xl font-bold text-white mb-4">Thoughts</h2>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            {% for post in recent_posts %}
+                            <div class="blog-card content-card flex gap-4 p-4 rounded-md group items-center" data-title="{{ post.title }}" data-description="{{ post.content|safe }}">
+                                <div class="min-w-[64px] h-16 bg-[#333] rounded flex items-center justify-center text-gray-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 12h6m-1-4h.01"></path></svg></div>
+                                <div class="overflow-hidden"><h3 class="text-white font-bold truncate group-hover:text-[#1db954] transition text-sm md:text-base">{{ post.title }}</h3><p class="text-xs text-gray-400 mt-1">{{ post.published_at|date:"M d, Y" }}</p><p class="text-xs text-gray-500 mt-1 line-clamp-1">{{ post.excerpt|default:"Click to read more..." }}</p></div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    <section id="contact">
+                        <h2 class="text-xl md:text-2xl font-bold text-white mb-4">Get in Touch</h2>
+                        <div class="bg-gradient-to-br from-[#181818] to-[#121212] rounded-lg p-6 md:p-8 border border-[#282828] shadow-lg">
+                            <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+                                <div class="flex flex-col justify-between">
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-white mb-2">Let's Connect</h3>
+                                        <p class="text-gray-400 mb-6">Have a project in mind or just want to say hi? Fill out the form and I'll send you a confirmation email instantly.</p>
+                                        
+                                        <div class="space-y-4">
+                                            {% if socials.email_link %}
+                                            <div class="flex items-center gap-3 text-gray-300 hover:text-white transition">
+                                                <div class="w-10 h-10 rounded-full bg-[#282828] flex items-center justify-center text-[#1db954]">
+                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                                                </div>
+                                                <span>{{ socials.email_link }}</span>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            {% if socials.linkedin %}
+                                            <a href="{{ socials.linkedin }}" target="_blank" class="flex items-center gap-3 text-gray-300 hover:text-white transition">
+                                                <div class="w-10 h-10 rounded-full bg-[#282828] flex items-center justify-center text-[#1db954]">
+                                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                                                </div>
+                                                <span>LinkedIn Profile</span>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form method="POST" action="{% url 'home' %}" class="space-y-4">
+                                    {% csrf_token %}
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="space-y-1">
+                                            <label for="name" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Name</label>
+                                            <input type="text" name="name" id="name" required placeholder="Your Name" 
+                                                class="w-full bg-[#3e3e3e] text-white border-0 rounded p-3 focus:ring-2 focus:ring-[#1db954] placeholder-gray-500 transition-all hover:bg-[#484848]">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label for="email" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Email</label>
+                                            <input type="email" name="email" id="email" required placeholder="name@example.com" 
+                                                class="w-full bg-[#3e3e3e] text-white border-0 rounded p-3 focus:ring-2 focus:ring-[#1db954] placeholder-gray-500 transition-all hover:bg-[#484848]">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="space-y-1">
+                                        <label for="subject" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Subject</label>
+                                        <input type="text" name="subject" id="subject" placeholder="Project Inquiry" 
+                                            class="w-full bg-[#3e3e3e] text-white border-0 rounded p-3 focus:ring-2 focus:ring-[#1db954] placeholder-gray-500 transition-all hover:bg-[#484848]">
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <label for="message" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Message</label>
+                                        <textarea name="message" id="message" rows="4" required placeholder="Tell me about your project..." 
+                                            class="w-full bg-[#3e3e3e] text-white border-0 rounded p-3 focus:ring-2 focus:ring-[#1db954] placeholder-gray-500 transition-all hover:bg-[#484848] resize-none"></textarea>
+                                    </div>
+
+                                    <button type="submit" class="w-full md:w-auto bg-[#1db954] text-black font-bold uppercase tracking-widest text-xs py-4 px-8 rounded-full hover:scale-105 hover:bg-[#1ed760] transition-all duration-200 shadow-lg">
+                                        Send Message
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer class="mt-12 pb-44 md:pb-12 text-gray-400 text-sm">
+                        <div class="border-t border-[#282828] pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div class="flex gap-8">
+                                {% if socials.linkedin %}
+                                <a href="{{ socials.linkedin }}" target="_blank" class="w-10 h-10 rounded-full bg-[#282828] hover:bg-[#1db954] hover:text-white flex items-center justify-center transition-all duration-300 group">
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                                </a>
+                                {% endif %}
+                                {% if socials.github %}
+                                <a href="{{ socials.github }}" target="_blank" class="w-10 h-10 rounded-full bg-[#282828] hover:bg-[#1db954] hover:text-white flex items-center justify-center transition-all duration-300 group">
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                </a>
+                                {% endif %}
+                                {% if socials.email %}
+                                <a href="{{ socials.email }}" class="w-10 h-10 rounded-full bg-[#282828] hover:bg-[#1db954] hover:text-white flex items-center justify-center transition-all duration-300 group">
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                                </a>
+                                {% endif %}
+                            </div>
+                            <div class="text-right flex flex-col items-center md:items-end">
+                                <p class="text-xs text-gray-500">&copy; {% now "Y" %} {{ about.name }}</p>
+                                <p class="text-[10px] text-gray-600 mt-1">Portfolio v2.0</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+                {% endif %}
+            </main>
+
+            <footer class="now-playing-bar bg-[#181818] border-t border-[#282828] px-3 py-2 md:px-4 md:py-3 flex items-center justify-between z-40 fixed bottom-[65px] left-0 w-full md:static md:w-auto">
+                <div class="flex items-center gap-2 md:gap-4 w-[40%] md:w-[30%]">
+                    <div id="now-playing-img-wrapper" class="w-10 h-10 md:w-14 md:h-14 bg-[#282828] rounded shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <img src="https://placehold.co/60x60/222/1DB954?text=♫" class="w-full h-full object-cover" id="song-img">
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 id="song-title" class="text-xs md:text-sm text-white font-semibold hover:underline cursor-pointer truncate">Midnight Coding</h4>
+                        <p id="song-artist" class="text-[10px] md:text-xs text-gray-400 hover:underline cursor-pointer truncate">Lofi Vibes</p>
+                    </div>
+                    <button class="text-[#1db954] hover:text-[#1ed760] hidden lg:block"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+                </div>
+
+                <div class="flex flex-col items-center w-[55%] md:w-[40%] max-w-2xl">
+                    <div class="flex items-center gap-4 md:gap-6 mb-1">
+                        <button class="text-gray-400 hover:text-white hidden md:block"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M3.3 1a.7.7 0 0 1 .7.7v12.6a.7.7 0 0 1-1.4 0V1.7a.7.7 0 0 1 .7-.7zm9.896 1.696a.7.7 0 0 1 1.007.884L9.12 8l5.083 4.42a.7.7 0 0 1-1.007.884l-5.9-5.13a.7.7 0 0 1 0-1.148l5.9-5.13z"/></svg></button>
+                        
+                        <button id="master-play-btn" class="w-8 h-8 md:w-8 md:h-8 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition">
+                            <svg id="icon-play" class="w-4 h-4 md:w-5 md:h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <svg id="icon-pause" class="w-4 h-4 md:w-5 md:h-5 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        
+                        <button class="text-gray-400 hover:text-white hidden md:block"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M12.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 1.4 0V1.7a.7.7 0 0 0-.7-.7zm-9.896 1.696a.7.7 0 0 0-1.007.884L6.88 8l-5.083 4.42a.7.7 0 0 0 1.007.884l5.9-5.13a.7.7 0 0 0 0-1.148l-5.9-5.13z"/></svg></button>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 w-full text-[10px] md:text-xs text-gray-400 font-mono select-none">
+                        <span id="current-time" class="min-w-[25px] md:min-w-[30px] text-right">0:00</span>
+                        <div id="progress-container" class="h-1 bg-[#535353] rounded-full w-full group cursor-pointer progress-bar-container relative">
+                            <div class="progress-bar-inner h-full bg-white rounded-full w-[0%] relative">
+                                <div class="w-3 h-3 bg-white rounded-full absolute -right-1.5 -top-1 shadow opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+                        </div>
+                        <span id="total-time" class="min-w-[25px] md:min-w-[30px]">0:00</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 w-[10%] md:w-[30%]">
+                    <div id="equalizer" class="equalizer opacity-0 transition-opacity hidden md:flex">
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    </div>
+                    <div class="w-24 h-1 bg-[#535353] rounded-full hidden md:block cursor-pointer group">
+                        <div class="h-full bg-white group-hover:bg-[#1db954] w-[70%] rounded-full"></div>
+                    </div>
+                </div>
+            </footer>
+
+            <nav class="md:hidden fixed bottom-0 w-full mobile-nav-glass h-[65px] flex justify-evenly items-center z-50 pb-1">
+                <a href="#" onclick="document.getElementById('main-content').scrollTo({top: 0, behavior: 'smooth'}); return false;" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
+                    <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33z"/>
+                    </svg>
+                    <span class="text-[9px] font-medium">Home</span>
+                </a>
+
+                {% if projects %}
+                <a href="#projects" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
+                    <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10.5 3a7.5 7.5 0 015.645 12.438l4.709 4.708a1 1 0 01-1.414 1.415l-4.708-4.709A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"/>
+                    </svg>
+                    <span class="text-[9px] font-medium">Projects</span>
+                </a>
+                {% endif %}
+
+                <a href="#about" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
+                    <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    <span class="text-[9px] font-medium">About</span>
+                </a>
+
+                {% if recent_posts %}
+                <a href="#blog" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
+                    <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2zm-7 14H6v-2h6v2zm5-4H6v-2h11v2zm0-4H6V6h11v2z"/>
+                    </svg>
+                    <span class="text-[9px] font-medium">Blog</span>
+                </a>
+                {% endif %}
+                
+                <a href="#contact" class="flex flex-col items-center text-gray-400 hover:text-white p-2 min-w-[50px] active:text-white transition group">
+                    <svg class="w-6 h-6 mb-1 text-gray-400 group-hover:text-white group-active:text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                    <span class="text-[9px] font-medium">Contact</span>
+                </a>
+            </nav>
+            
+        </div>
+
+        <div id="project-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-[#282828] w-full max-w-3xl max-h-[90vh] rounded-lg shadow-2xl overflow-hidden flex flex-col relative animate-fade-in-up">
+                <button id="close-modal" class="absolute top-4 right-4 z-20 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <div class="flex-1 overflow-y-auto">
+                    <div id="modal-header" class="h-64 w-full bg-gray-700 relative">
+                        <img id="modal-img" src="" class="w-full h-full object-cover opacity-60">
+                        <div class="absolute bottom-0 left-0 p-6 md:p-8 bg-gradient-to-t from-[#282828] to-transparent w-full"><h2 id="modal-title" class="text-2xl md:text-4xl font-black text-white shadow-black drop-shadow-md"></h2></div>
+                    </div>
+                    <div class="p-6 md:p-8">
+                        <div id="modal-description" class="prose prose-invert max-w-none text-sm md:text-base"></div>
+                        <div class="mt-8 pt-6 border-t border-gray-700 flex justify-end"><a id="modal-link" href="#" target="_blank" class="bg-[#1db954] hover:bg-[#1ed760] text-black font-bold py-3 px-8 rounded-full transform hover:scale-105 transition shadow-lg">View Project</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resume-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-0 md:p-4 backdrop-blur-md">
+            <div class="w-full max-w-4xl flex justify-between items-center p-4 text-white z-20">
+                <h2 class="font-bold text-xl">Resume</h2>
+                <div class="flex gap-4">
+                    <button onclick="generatePDF()" class="bg-[#1db954] hover:bg-[#1ed760] text-black font-bold py-2 px-6 rounded-full transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span id="pdf-btn-text">Download PDF</span>
+                    </button>
+                    <button onclick="closeResumeModal()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 w-full overflow-y-auto pb-20 md:pb-4" id="resume-scroll-container">
+                
+                <div id="resume-paper-modern">
+                    
+                    <aside class="resume-left-col">
+                        
+                        <div class="mod-section">
+                            <h2>Contact</h2>
+                            {% if socials.email_link %}
+                            <div class="mod-contact-item">
+                                <strong>Email:</strong><br>
+                                <a href="mailto:{{ socials.email_link }}">{{ socials.email_link }}</a>
+                            </div>
+                            {% endif %}
+                            {% if socials.linkedin %}
+                            <div class="mod-contact-item">
+                                <strong>LinkedIn:</strong><br>
+                                <a href="{{ socials.linkedin }}">View Profile</a>
+                            </div>
+                            {% endif %}
+                            {% if socials.github %}
+                            <div class="mod-contact-item">
+                                <strong>GitHub:</strong><br>
+                                <a href="{{ socials.github }}">View Profile</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if educations %}
+                        <div class="mod-section">
+                            <h2>Education</h2>
+                            {% for edu in educations %}
+                            <div class="mod-entry">
+                                <div class="mod-title">{{ edu.institution }}</div>
+                                <div class="mod-company">{{ edu.degree }}</div>
+                                <div class="mod-date">{{ edu.start_year }} – {{ edu.end_year }}</div>
+                                {% if edu.description %}
+                                <div class="mod-desc" style="margin-top: 4px;">{{ edu.description|linebreaksbr }}</div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if about.skills.all %}
+                        <div class="mod-section">
+                            <h2>Skills</h2>
+                            <div class="mod-skills-grid">
+                                {% for skill in about.skills.all %}
+                                    <span class="mod-skill-tag">{{ skill.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </aside>
+
+                    <main class="resume-right-col">
+                        
+                        <div class="mod-header">
+                            <h1>{{ about.name }}</h1>
+                            <div class="mod-role">{{ about.title }}</div>
+                        </div>
+
+                        {% if about.description %}
+                        <div class="mod-section">
+                            <h2>About Me</h2>
+                            <div class="mod-desc">{{ about.description }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if jobs %}
+                        <div class="mod-section">
+                            <h2>Experience</h2>
+                            {% for job in jobs %}
+                            <div class="mod-entry">
+                                <div class="mod-entry-header">
+                                    <span class="mod-title">{{ job.role }}</span>
+                                    <span class="mod-date">{{ job.start_date }} – {{ job.end_date|default:"Present" }}</span>
+                                </div>
+                                <div class="mod-company">{{ job.company }} {% if job.location %}| {{ job.location }}{% endif %}</div>
+                                <div class="mod-desc">{{ job.description|linebreaksbr }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
 
                     {% if projects %}
                     <div class="mod-section">
@@ -700,228 +700,228 @@
                                 <span class="mod-title">{{ project.title }}</span>
                                 <span class="mod-date">Project</span>
                             </div>
-                            <div class="mod-desc">{{ project.short_description }}</div>
+                            <div class="mod-desc">{{ project.long_description|linebreaksbr }}</div>
                         </div>
                         {% endfor %}
                     </div>
                     {% endif %}
 
-                </main>
-            </div>
-            </div>
-    </div>
+                    </main>
+                </div>
+                </div>
+        </div>
 
-    <script>
-        // --- VIBRANT SPOTIFY PALETTE ---
-        const colors = [
-            'rgba(83, 83, 83, 0.9)',    // Grey
-            'rgba(65, 0, 245, 0.8)',    // Electric Purple
-            'rgba(233, 20, 41, 0.8)',   // Vibrant Red
-            'rgba(20, 140, 50, 0.8)',   // Deep Green
-            'rgba(216, 64, 0, 0.8)',    // Orange
-            'rgba(13, 114, 234, 0.8)',  // Blue
-            'rgba(176, 40, 151, 0.8)',  // Magenta
-            'rgba(0, 100, 80, 0.8)'     // Teal
-        ];
-        // Apply random gradient on load
-        document.getElementById('header-gradient').style.background = `linear-gradient(to bottom, ${colors[Math.floor(Math.random() * colors.length)]}, #121212 400px)`;
+        <script>
+            // --- VIBRANT SPOTIFY PALETTE ---
+            const colors = [
+                'rgba(83, 83, 83, 0.9)',    // Grey
+                'rgba(65, 0, 245, 0.8)',    // Electric Purple
+                'rgba(233, 20, 41, 0.8)',   // Vibrant Red
+                'rgba(20, 140, 50, 0.8)',   // Deep Green
+                'rgba(216, 64, 0, 0.8)',    // Orange
+                'rgba(13, 114, 234, 0.8)',  // Blue
+                'rgba(176, 40, 151, 0.8)',  // Magenta
+                'rgba(0, 100, 80, 0.8)'     // Teal
+            ];
+            // Apply random gradient on load
+            document.getElementById('header-gradient').style.background = `linear-gradient(to bottom, ${colors[Math.floor(Math.random() * colors.length)]}, #121212 400px)`;
 
-        // --- UI ELEMENTS ---
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('main-header');
-        const modal = document.getElementById('project-modal');
-        const resumeModal = document.getElementById('resume-modal');
-        const cards = document.querySelectorAll('.content-card');
-        
-        // --- PLAYER ELEMENTS ---
-        const playBtn = document.getElementById('master-play-btn');
-        const iconPlay = document.getElementById('icon-play');
-        const iconPause = document.getElementById('icon-pause');
-        const equalizer = document.getElementById('equalizer');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBarInner = document.querySelector('.progress-bar-inner');
-        const currentTimeEl = document.getElementById('current-time');
-        const totalTimeEl = document.getElementById('total-time');
+            // --- UI ELEMENTS ---
+            const mainContent = document.getElementById('main-content');
+            const header = document.getElementById('main-header');
+            const modal = document.getElementById('project-modal');
+            const resumeModal = document.getElementById('resume-modal');
+            const cards = document.querySelectorAll('.content-card');
+            
+            // --- PLAYER ELEMENTS ---
+            const playBtn = document.getElementById('master-play-btn');
+            const iconPlay = document.getElementById('icon-play');
+            const iconPause = document.getElementById('icon-pause');
+            const equalizer = document.getElementById('equalizer');
+            const progressContainer = document.getElementById('progress-container');
+            const progressBarInner = document.querySelector('.progress-bar-inner');
+            const currentTimeEl = document.getElementById('current-time');
+            const totalTimeEl = document.getElementById('total-time');
 
-        // --- AUDIO SETUP ---
-        const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3');
-        audio.volume = 0.5;
-        let isPlaying = false;
+            // --- AUDIO SETUP ---
+            const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3');
+            audio.volume = 0.5;
+            let isPlaying = false;
 
-        const currentSong = {
-            title: "Midnight Coding",
-            artist: "Lofi Vibes",
-            cover: "https://placehold.co/60x60/222/1DB954?text=♫" 
-        };
+            const currentSong = {
+                title: "Midnight Coding",
+                artist: "Lofi Vibes",
+                cover: "https://placehold.co/60x60/222/1DB954?text=♫" 
+            };
 
-        document.getElementById('song-title').innerText = currentSong.title;
-        document.getElementById('song-artist').innerText = currentSong.artist;
-        document.getElementById('song-img').src = currentSong.cover;
+            document.getElementById('song-title').innerText = currentSong.title;
+            document.getElementById('song-artist').innerText = currentSong.artist;
+            document.getElementById('song-img').src = currentSong.cover;
 
-        const formatTime = (seconds) => {
-            if (isNaN(seconds)) return "0:00";
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
-            return `${min}:${sec}`;
-        };
+            const formatTime = (seconds) => {
+                if (isNaN(seconds)) return "0:00";
+                const min = Math.floor(seconds / 60);
+                const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
+                return `${min}:${sec}`;
+            };
 
-        playBtn.addEventListener('click', () => {
-            if (isPlaying) {
-                audio.pause();
+            playBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    audio.pause();
+                    isPlaying = false;
+                    iconPlay.classList.remove('hidden');
+                    iconPause.classList.add('hidden');
+                    equalizer.classList.remove('opacity-0'); 
+                    equalizer.classList.add('opacity-0'); 
+                } else {
+                    audio.play().catch(e => console.log("Audio play blocked:", e));
+                    isPlaying = true;
+                    iconPlay.classList.add('hidden');
+                    iconPause.classList.remove('hidden');
+                    equalizer.classList.remove('opacity-0');
+                }
+            });
+
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration) {
+                    const percent = (audio.currentTime / audio.duration) * 100;
+                    progressBarInner.style.width = `${percent}%`;
+                    currentTimeEl.innerText = formatTime(audio.currentTime);
+                    totalTimeEl.innerText = formatTime(audio.duration);
+                }
+            });
+
+            progressContainer.addEventListener('click', (e) => {
+                const width = progressContainer.clientWidth;
+                const clickX = e.offsetX;
+                const duration = audio.duration;
+                audio.currentTime = (clickX / width) * duration;
+            });
+
+            audio.addEventListener('loadedmetadata', () => {
+                totalTimeEl.innerText = formatTime(audio.duration);
+            });
+
+            audio.addEventListener('ended', () => {
                 isPlaying = false;
                 iconPlay.classList.remove('hidden');
                 iconPause.classList.add('hidden');
-                equalizer.classList.remove('opacity-0'); 
-                equalizer.classList.add('opacity-0'); 
-            } else {
-                audio.play().catch(e => console.log("Audio play blocked:", e));
-                isPlaying = true;
-                iconPlay.classList.add('hidden');
-                iconPause.classList.remove('hidden');
-                equalizer.classList.remove('opacity-0');
-            }
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const percent = (audio.currentTime / audio.duration) * 100;
-                progressBarInner.style.width = `${percent}%`;
-                currentTimeEl.innerText = formatTime(audio.currentTime);
-                totalTimeEl.innerText = formatTime(audio.duration);
-            }
-        });
-
-        progressContainer.addEventListener('click', (e) => {
-            const width = progressContainer.clientWidth;
-            const clickX = e.offsetX;
-            const duration = audio.duration;
-            audio.currentTime = (clickX / width) * duration;
-        });
-
-        audio.addEventListener('loadedmetadata', () => {
-            totalTimeEl.innerText = formatTime(audio.duration);
-        });
-
-        audio.addEventListener('ended', () => {
-            isPlaying = false;
-            iconPlay.classList.remove('hidden');
-            iconPause.classList.add('hidden');
-            equalizer.classList.add('opacity-0');
-            progressBarInner.style.width = '0%';
-            currentTimeEl.innerText = "0:00";
-        });
-
-        // --- SCROLL & MODAL LOGIC ---
-        mainContent.addEventListener('scroll', () => {
-            if (mainContent.scrollTop > 60) header.classList.add('scrolled');
-            else header.classList.remove('scrolled');
-        });
-
-        // Project Modal
-        const openModal = (card) => {
-            document.getElementById('modal-title').innerText = card.dataset.title;
-            document.getElementById('modal-description').innerHTML = card.dataset.description;
-            const imgUrl = card.dataset.image;
-            const imgEl = document.getElementById('modal-img');
-            if(imgUrl) { imgEl.src = imgUrl; imgEl.style.display = 'block'; } 
-            else { imgEl.style.display = 'none'; }
-            const link = card.dataset.link;
-            const linkBtn = document.getElementById('modal-link');
-            if(link && link !== '#') { linkBtn.href = link; linkBtn.classList.remove('hidden'); } 
-            else { linkBtn.classList.add('hidden'); }
-            modal.classList.remove('hidden');
-        };
-
-        cards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                openModal(card);
+                equalizer.classList.add('opacity-0');
+                progressBarInner.style.width = '0%';
+                currentTimeEl.innerText = "0:00";
             });
-        });
 
-        document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
-        modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.add('hidden'); });
+            // --- SCROLL & MODAL LOGIC ---
+            mainContent.addEventListener('scroll', () => {
+                if (mainContent.scrollTop > 60) header.classList.add('scrolled');
+                else header.classList.remove('scrolled');
+            });
 
-        // --- RESUME MODAL LOGIC ---
-        const openResumeModal = () => {
-            resumeModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; 
-        };
-
-        const closeResumeModal = () => {
-            resumeModal.classList.add('hidden');
-            document.body.style.overflow = ''; 
-        };
-        
-        resumeModal.addEventListener('click', (e) => { if(e.target === resumeModal) closeResumeModal(); });
-
-        // PDF Generation
-        function generatePDF() {
-            // TARGET THE NEW MODERN LAYOUT ID
-            const element = document.getElementById('resume-paper-modern'); 
-            const buttonText = document.getElementById('pdf-btn-text');
-            const originalText = buttonText.innerText;
-            
-            buttonText.innerText = "Generating...";
-            
-            const opt = {
-                margin:       0,
-                filename:     '{{ about.name|slugify }}_Resume.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            // Project Modal
+            const openModal = (card) => {
+                document.getElementById('modal-title').innerText = card.dataset.title;
+                document.getElementById('modal-description').innerHTML = card.dataset.description;
+                const imgUrl = card.dataset.image;
+                const imgEl = document.getElementById('modal-img');
+                if(imgUrl) { imgEl.src = imgUrl; imgEl.style.display = 'block'; } 
+                else { imgEl.style.display = 'none'; }
+                const link = card.dataset.link;
+                const linkBtn = document.getElementById('modal-link');
+                if(link && link !== '#') { linkBtn.href = link; linkBtn.classList.remove('hidden'); } 
+                else { linkBtn.classList.add('hidden'); }
+                modal.classList.remove('hidden');
             };
 
-            // Mobile layout fix for PDF generation
-            const originalWidth = element.style.width;
-            if(window.innerWidth < 768) {
-                element.style.width = '210mm'; 
-                // Ensure sidebar stays side-by-side for PDF even on mobile
-                element.style.flexDirection = 'row'; 
+            cards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    openModal(card);
+                });
+            });
+
+            document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
+            modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.add('hidden'); });
+
+            // --- RESUME MODAL LOGIC ---
+            const openResumeModal = () => {
+                resumeModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; 
+            };
+
+            const closeResumeModal = () => {
+                resumeModal.classList.add('hidden');
+                document.body.style.overflow = ''; 
+            };
+            
+            resumeModal.addEventListener('click', (e) => { if(e.target === resumeModal) closeResumeModal(); });
+
+            // PDF Generation
+            function generatePDF() {
+                // TARGET THE NEW MODERN LAYOUT ID
+                const element = document.getElementById('resume-paper-modern'); 
+                const buttonText = document.getElementById('pdf-btn-text');
+                const originalText = buttonText.innerText;
+                
+                buttonText.innerText = "Generating...";
+                
+                const opt = {
+                    margin:       0,
+                    filename:     '{{ about.name|slugify }}_Resume.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Mobile layout fix for PDF generation
+                const originalWidth = element.style.width;
+                if(window.innerWidth < 768) {
+                    element.style.width = '210mm'; 
+                    // Ensure sidebar stays side-by-side for PDF even on mobile
+                    element.style.flexDirection = 'row'; 
+                }
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    buttonText.innerText = originalText;
+                    if(window.innerWidth < 768) {
+                        element.style.width = '100%'; 
+                        element.style.flexDirection = 'column'; // Reset for user view
+                    }
+                });
             }
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                buttonText.innerText = originalText;
-                if(window.innerWidth < 768) {
-                    element.style.width = '100%'; 
-                    element.style.flexDirection = 'column'; // Reset for user view
+            // --- INITIALS GENERATOR ---
+            const generateInitials = (title) => {
+                if (!title) return '';
+                title = title.trim();
+                if (title.includes(' ')) return title.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 4);
+                const capitalMatches = title.match(/[A-Z]/g);
+                if (capitalMatches && capitalMatches.length > 0) return capitalMatches.join('').slice(0, 4);
+                return title.substring(0, 2).toUpperCase();
+            };
+
+            const initPlaceholders = () => {
+                const placeholders = document.querySelectorAll('.project-initials-placeholder');
+                placeholders.forEach(el => {
+                    const title = el.getAttribute('data-title');
+                    el.innerText = generateInitials(title);
+                });
+            };
+
+            initPlaceholders();
+            document.addEventListener('DOMContentLoaded', initPlaceholders);
+
+            // --- AUTO DISMISS TOASTS ---
+            document.addEventListener('DOMContentLoaded', () => {
+                const toastContainer = document.getElementById('toast-container');
+                if (toastContainer) {
+                    setTimeout(() => {
+                        toastContainer.style.opacity = '0'; // Fade out
+                        setTimeout(() => {
+                            toastContainer.remove(); // Remove from DOM
+                        }, 500);
+                    }, 5000); // 5 seconds
                 }
             });
-        }
 
-        // --- INITIALS GENERATOR ---
-        const generateInitials = (title) => {
-            if (!title) return '';
-            title = title.trim();
-            if (title.includes(' ')) return title.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 4);
-            const capitalMatches = title.match(/[A-Z]/g);
-            if (capitalMatches && capitalMatches.length > 0) return capitalMatches.join('').slice(0, 4);
-            return title.substring(0, 2).toUpperCase();
-        };
-
-        const initPlaceholders = () => {
-            const placeholders = document.querySelectorAll('.project-initials-placeholder');
-            placeholders.forEach(el => {
-                const title = el.getAttribute('data-title');
-                el.innerText = generateInitials(title);
-            });
-        };
-
-        initPlaceholders();
-        document.addEventListener('DOMContentLoaded', initPlaceholders);
-
-        // --- AUTO DISMISS TOASTS ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const toastContainer = document.getElementById('toast-container');
-            if (toastContainer) {
-                setTimeout(() => {
-                    toastContainer.style.opacity = '0'; // Fade out
-                    setTimeout(() => {
-                        toastContainer.remove(); // Remove from DOM
-                    }, 500);
-                }, 5000); // 5 seconds
-            }
-        });
-
-    </script>
-</body>
-</html>
+        </script>
+    </body>
+    </html>
