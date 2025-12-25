@@ -641,6 +641,9 @@
                             <div class="mod-title">{{ edu.institution }}</div>
                             <div class="mod-company">{{ edu.degree }}</div>
                             <div class="mod-date">{{ edu.start_year }} – {{ edu.end_year }}</div>
+                            {% if edu.description %}
+                            <div class="mod-desc" style="margin-top: 4px;">{{ edu.description|linebreaksbr }}</div>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
